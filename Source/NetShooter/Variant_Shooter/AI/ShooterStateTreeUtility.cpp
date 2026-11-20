@@ -84,6 +84,11 @@ EStateTreeRunStatus FStateTreeFaceActorTask::EnterState(FStateTreeExecutionConte
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
 	// set the AI Controller's focus
+	if (!IsValid(InstanceData.Controller) || !IsValid(InstanceData.ActorToFaceTowards))
+	{
+		return EStateTreeRunStatus::Failed;
+	}
+
 	InstanceData.Controller->SetFocus(InstanceData.ActorToFaceTowards);
 
 	return EStateTreeRunStatus::Running;
@@ -95,7 +100,13 @@ void FStateTreeFaceActorTask::ExitState(FStateTreeExecutionContext& Context, con
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
 	// clear the AI Controller's focus
-	InstanceData.Controller->ClearFocus(EAIFocusPriority::Gameplay);
+	if (IsValid(InstanceData.Controller))
+	{
+		if (IsValid(InstanceData.Controller))
+	{
+		InstanceData.Controller->ClearFocus(EAIFocusPriority::Gameplay);
+	}
+	}
 }
 
 #if WITH_EDITOR
@@ -113,6 +124,11 @@ EStateTreeRunStatus FStateTreeFaceLocationTask::EnterState(FStateTreeExecutionCo
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
 	// set the AI Controller's focus
+	if (!IsValid(InstanceData.Controller))
+	{
+		return EStateTreeRunStatus::Failed;
+	}
+
 	InstanceData.Controller->SetFocalPoint(InstanceData.FaceLocation);
 
 	return EStateTreeRunStatus::Running;
