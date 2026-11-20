@@ -45,6 +45,9 @@ void AShooterPlayerController::InitializeScoreboard(TSubclassOf<UShooterUI> Widg
 		return;
 	}
 
+	// Keep the class in case this RPC arrives before the replicated GameState.
+	PendingShooterUIClass = WidgetClass;
+
 	if (!IsValid(ShooterUI))
 	{
 		ShooterUI = CreateWidget<UShooterUI>(this, WidgetClass);
@@ -72,6 +75,14 @@ void AShooterPlayerController::InitializeScoreboard(TSubclassOf<UShooterUI> Widg
 				ShooterUI->BP_UpdateScore(static_cast<uint8>(TeamIndex), TeamScores[TeamIndex]);
 			}
 		}
+	}
+}
+
+void AShooterPlayerController::OnShooterGameStateReady()
+{
+	if (IsLocalController() && PendingShooterUIClass)
+	{
+		InitializeScoreboard(PendingShooterUIClass);
 	}
 }
 
