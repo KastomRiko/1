@@ -93,8 +93,16 @@ void AShooterPickup::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		// disable ticking
 		SetActorTickEnabled(false);
 
-		// schedule the respawn
-		GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterPickup::RespawnPickup, RespawnTime, false);
+		// A zero timer rate clears the timer instead of scheduling it.
+		// Respawn immediately when no delay is configured.
+		if (RespawnTime <= KINDA_SMALL_NUMBER)
+		{
+			RespawnPickup();
+		}
+		else
+		{
+			GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterPickup::RespawnPickup, RespawnTime, false);
+		}
 	}
 }
 
