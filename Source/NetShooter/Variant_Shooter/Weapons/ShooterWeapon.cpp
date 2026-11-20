@@ -45,7 +45,6 @@ void AShooterWeapon::BeginPlay()
         TimeOfLastShot = -FMath::Max(RefireRate, 0.01f);
     }
 
-    SetActorHiddenInGame(true);
 }
 
 void AShooterWeapon::OnRep_Owner()
