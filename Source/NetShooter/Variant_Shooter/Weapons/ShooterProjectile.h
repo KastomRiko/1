@@ -9,6 +9,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class ACharacter;
+class UDamageType;
 class UPrimitiveComponent;
 
 UCLASS(Abstract)
