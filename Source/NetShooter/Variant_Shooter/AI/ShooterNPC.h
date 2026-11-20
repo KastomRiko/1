@@ -70,6 +70,9 @@ protected:
 public:
     FPawnDeathDelegate OnPawnDeath;
 
+    UFUNCTION(BlueprintPure, Category="Team")
+    uint8 GetTeamByte() const { return TeamByte; }
+
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -92,7 +95,7 @@ protected:
     void OnRep_IsDead();
 
     void ApplyDeathState();
-    void Die();
+    void Die(AController* Killer);
     void DeferredDestruction();
 
 public:
