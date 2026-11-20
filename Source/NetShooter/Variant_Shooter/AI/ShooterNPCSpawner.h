@@ -46,6 +46,9 @@ protected:
 	/** Timer to spawn NPCs after a delay */
 	FTimerHandle SpawnTimer;
 
+	/** Consecutive transient spawn failures; reset after a successful spawn. */
+	int32 ConsecutiveSpawnFailures = 0;
+
 public:	
 	
 	/** Constructor */
