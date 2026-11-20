@@ -89,6 +89,17 @@ void AShooterProjectile::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, U
 
 void AShooterProjectile::MulticastProjectileHit_Implementation(const FHitResult& Hit)
 {
+    // Stop local client simulation as well as the authoritative projectile.
+    if (CollisionComponent)
+    {
+        CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+    if (ProjectileMovement)
+    {
+        ProjectileMovement->StopMovementImmediately();
+    }
+
     BP_OnProjectileHit(Hit);
 }
 
