@@ -101,6 +101,12 @@ void AShooterPlayerController::OnPossess(APawn* InPawn)
 
 void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
 {
+	// Respawning must be performed by the server, not independently on each client.
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	// reset the bullet counter HUD
 	if (IsValid(BulletCounterUI))
 	{
