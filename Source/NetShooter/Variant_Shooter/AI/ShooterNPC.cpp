@@ -149,6 +149,10 @@ void AShooterNPC::AddWeaponClass(const TSubclassOf<AShooterWeapon>& InWeaponClas
     SpawnParams.Instigator = this;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     Weapon = GetWorld()->SpawnActor<AShooterWeapon>(InWeaponClass, GetActorTransform(), SpawnParams);
+    if (IsValid(Weapon))
+    {
+        Weapon->ActivateWeapon(NAME_None);
+    }
 }
 
 void AShooterNPC::OnWeaponActivated(AShooterWeapon* InWeapon)
