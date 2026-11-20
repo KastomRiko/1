@@ -439,7 +439,11 @@ void AShooterCharacter::Die(AController* Killer)
     Tags.AddUnique(DeathTag);
     ApplyDeathState();
 
-    if (GetWorld())
+    if (RespawnTime <= KINDA_SMALL_NUMBER)
+    {
+        OnRespawn();
+    }
+    else if (GetWorld())
     {
         GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterCharacter::OnRespawn, RespawnTime, false);
     }
