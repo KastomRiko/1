@@ -5,4 +5,4 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, NetShooter, "NetShooter" );
 
-DEFINE_LOG_CATEGORY(LogNetShooter)
+DEFINE_LOG_CATEGORY(LogNetShooter);
