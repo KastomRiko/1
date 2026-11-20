@@ -184,6 +184,12 @@ EStateTreeRunStatus FStateTreeShootAtTargetTask::EnterState(FStateTreeExecutionC
 	// get the instance data
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
+	// The StateTree binding can be unset or the pawn can be destroyed during a transition.
+	if (!IsValid(InstanceData.Character))
+	{
+		return EStateTreeRunStatus::Failed;
+	}
+
 	// tell the character to shoot the target
 	InstanceData.Character->StartShooting(InstanceData.Target);
 
@@ -195,8 +201,11 @@ void FStateTreeShootAtTargetTask::ExitState(FStateTreeExecutionContext& Context,
 	// get the instance data
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
-	// tell the character to stop shooting
-	InstanceData.Character->StopShooting();
+	// The character may already have been destroyed while the task was active.
+	if (IsValid(InstanceData.Character))
+	{
+		InstanceData.Character->StopShooting();
+	}
 }
 
 #if WITH_EDITOR
