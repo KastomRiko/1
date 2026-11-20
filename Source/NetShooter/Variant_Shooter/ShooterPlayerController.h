@@ -8,7 +8,9 @@
 
 class UInputMappingContext;
 class AShooterCharacter;
+class AShooterGameState;
 class UShooterBulletCounterUI;
+class UShooterUI;
 
 /**
  *  Simple PlayerController for a first person shooter game
@@ -58,6 +60,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UShooterBulletCounterUI> BulletCounterUI;
 
+	/** Local scoreboard widget */
+	UPROPERTY()
+	TObjectPtr<UShooterUI> ShooterUI;
+
 	/** Team ID for this player */
 	uint8 TeamByte = 0;
 
@@ -69,6 +75,9 @@ protected:
 
 	/** Gameplay Initialization */
 	virtual void BeginPlay() override;
+
+	/** Clean up scoreboard bindings */
+	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 	/** Initialize input bindings */
 	virtual void SetupInputComponent() override;
@@ -107,4 +116,16 @@ public:
 
 	/** Assigns a team ID to this player */
 	void SetTeam(uint8 Team);
+
+	/** Creates and initializes the scoreboard on the owning local player */
+	void InitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass);
+
+	/** Requests the owning client to create its local scoreboard */
+	UFUNCTION(Client, Reliable)
+	void ClientInitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass);
+
+protected:
+
+	UFUNCTION()
+	void OnTeamScoreChanged(uint8 TeamByte, int32 Score);
 };
