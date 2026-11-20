@@ -62,7 +62,6 @@ void AShooterProjectile::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, U
 
     bHit = true;
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
     MakeNoise(NoiseLoudness, GetInstigator(), GetActorLocation(), NoiseRange, NoiseTag);
 
     if (bExplodeOnHit)
@@ -74,21 +73,23 @@ void AShooterProjectile::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, U
         ProcessHit(Other, OtherComp, Hit.ImpactPoint, -Hit.ImpactNormal);
     }
 
-    BP_OnProjectileHit(Hit);
+    MulticastProjectileHit(Hit);
 
     if (DeferredDestructionTime > 0.0f)
     {
         GetWorld()->GetTimerManager().SetTimer(
-            DestructionTimer,
-            this,
-            &AShooterProjectile::OnDeferredDestruction,
-            DeferredDestructionTime,
-            false);
+            DestructionTimer, this, &AShooterProjectile::OnDeferredDestruction,
+            DeferredDestructionTime, false);
     }
     else
     {
         Destroy();
     }
+}
+
+void AShooterProjectile::MulticastProjectileHit_Implementation(const FHitResult& Hit)
+{
+    BP_OnProjectileHit(Hit);
 }
 
 void AShooterProjectile::ExplosionCheck(const FVector& ExplosionCenter)
@@ -117,7 +118,7 @@ void AShooterProjectile::ExplosionCheck(const FVector& ExplosionCenter)
 
     GetWorld()->OverlapMultiByObjectType(Overlaps, ExplosionCenter, FQuat::Identity, ObjectParams, OverlapShape, QueryParams);
 
-    TSet<TObjectPtr<AActor>> DamagedActors;
+    TSet<AActor*> DamagedActors;
 
     for (const FOverlapResult& Overlap : Overlaps)
     {
@@ -148,10 +149,7 @@ void AShooterProjectile::ProcessHit(AActor* HitActor, UPrimitiveComponent* HitCo
         {
             AController* InstigatorController = GetInstigator() ? GetInstigator()->GetController() : nullptr;
             UGameplayStatics::ApplyDamage(
-                HitCharacter,
-                HitDamage,
-                InstigatorController,
-                this,
+                HitCharacter, HitDamage, InstigatorController, this,
                 HitDamageType ? HitDamageType : UDamageType::StaticClass());
         }
     }
