@@ -46,7 +46,10 @@ void AHorrorPlayerController::OnPossess(APawn* aPawn)
 				}
 			}
 
-			HorrorUI->SetupCharacter(HorrorCharacter);
+			if (HorrorUI)
+			{
+				HorrorUI->SetupCharacter(HorrorCharacter);
+			}
 		}
 	}
 	
