@@ -51,6 +51,11 @@ protected:
     UPROPERTY(ReplicatedUsing=OnRep_CurrentHP, BlueprintReadOnly, Category="Health")
     float CurrentHP = 500.0f;
 
+    UPROPERTY(ReplicatedUsing=OnRep_IsDead, BlueprintReadOnly, Category="Health")
+    bool bIsDead = false;
+
+    bool bDeathPresentationApplied = false;
+
     UPROPERTY(ReplicatedUsing=OnRep_TeamByte, BlueprintReadOnly, Category="Team")
     uint8 TeamByte = 0;
 
@@ -87,6 +92,11 @@ protected:
 
     UFUNCTION()
     void OnRep_CurrentHP();
+
+    UFUNCTION()
+    void OnRep_IsDead();
+
+    void ApplyDeathState();
 
     UFUNCTION()
     void OnRep_TeamByte();
