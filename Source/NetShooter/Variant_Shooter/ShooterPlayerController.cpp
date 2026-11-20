@@ -6,6 +6,7 @@
 #include "Engine/LocalPlayer.h"
 #include "InputMappingContext.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 #include "GameFramework/PlayerStart.h"
 #include "ShooterCharacter.h"
 #include "ShooterBulletCounterUI.h"
@@ -221,31 +222,63 @@ void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
 		return;
 	}
 
-	// reset the bullet counter HUD
-	if (IsValid(BulletCounterUI))
+	if (TeamByte < TeamTags.Num() && !TeamTags[TeamByte].IsNone())
 	{
-		BulletCounterUI->BP_UpdateBulletCounter(0, 0);
-	}
-
-	if (TeamByte < TeamTags.Num())
-	{
-		// find the player start
+		// Prefer a spawn point assigned to this player's team.
 		TArray<AActor*> ActorList;
-		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), APlayerStart::StaticClass(), TeamTags[TeamByte], ActorList);
+		UGameplayStatics::GetAllActorsOfClassWithTag(
+			GetWorld(), APlayerStart::StaticClass(), TeamTags[TeamByte], ActorList);
 
-		if (ActorList.Num() > 0)
+		// Fall back to any PlayerStart if the team has no tagged spawn points.
+		if (ActorList.IsEmpty())
 		{
-			// select a random player start
-			AActor* RandomPlayerStart = ActorList[FMath::RandRange(0, ActorList.Num() - 1)];
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), ActorList);
+		}
 
-			// spawn a character at the player start
+		if (!ActorList.IsEmpty())
+		{
+			AActor* RandomPlayerStart = ActorList[FMath::RandRange(0, ActorList.Num() - 1)];
 			const FTransform SpawnTransform = RandomPlayerStart->GetActorTransform();
 
-			if (AShooterCharacter* RespawnedCharacter = GetWorld()->SpawnActor<AShooterCharacter>(CharacterClass, SpawnTransform))
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride =
+				ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+			if (AShooterCharacter* RespawnedCharacter =
+				GetWorld()->SpawnActor<AShooterCharacter>(CharacterClass, SpawnTransform, SpawnParams))
 			{
-				// possess the character
 				Possess(RespawnedCharacter);
 			}
+		}
+		else
+		{
+			UE_LOG(LogNetShooter, Warning, TEXT("Cannot respawn player: no PlayerStart actors found."));
+		}
+	}
+	else
+	{
+		// No team tag is configured; use any available PlayerStart.
+		TArray<AActor*> ActorList;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), ActorList);
+
+		if (!ActorList.IsEmpty())
+		{
+			AActor* RandomPlayerStart = ActorList[FMath::RandRange(0, ActorList.Num() - 1)];
+			const FTransform SpawnTransform = RandomPlayerStart->GetActorTransform();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride =
+				ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+			if (AShooterCharacter* RespawnedCharacter =
+				GetWorld()->SpawnActor<AShooterCharacter>(CharacterClass, SpawnTransform, SpawnParams))
+			{
+				Possess(RespawnedCharacter);
+			}
+		}
+		else
+		{
+			UE_LOG(LogNetShooter, Warning, TEXT("Cannot respawn player: no PlayerStart actors found."));
 		}
 	}
 }
