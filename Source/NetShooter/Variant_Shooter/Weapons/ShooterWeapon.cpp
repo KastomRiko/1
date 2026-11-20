@@ -67,6 +67,7 @@ void AShooterWeapon::InitializeWeaponOwner()
     if (WeaponOwner)
     {
         WeaponOwner->AttachWeaponMeshes(this);
+        WeaponOwner->UpdateWeaponHUD(CurrentBullets, MagazineSize);
     }
 }
 
