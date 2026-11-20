@@ -55,6 +55,9 @@ public:
 	/** Increases the score for the given team */
 	void IncrementTeamScore(uint8 TeamByte);
 
+	/** Awards a point to the team of the controller that caused the death */
+	void IncrementTeamScoreForController(AController* ScoringController);
+
 	/** Returns true if enemy NPCs should be used */
 	bool ShouldSpawnEnemyNPCs() const;
 };
