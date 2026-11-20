@@ -40,10 +40,13 @@ void AHorrorCharacter::BeginPlay()
 
 void AHorrorCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
+	// Clear the sprint timer while the world is still available.
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SprintTimer);
+	}
 
-	// clear the sprint timer
-	GetWorld()->GetTimerManager().ClearTimer(SprintTimer);
+	Super::EndPlay(EndPlayReason);
 }
 
 void AHorrorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
