@@ -197,8 +197,15 @@ void AShooterNPC::Die(AController* Killer)
             GameMode->IncrementTeamScoreForController(Killer);
         }
 
-        GetWorld()->GetTimerManager().SetTimer(
-            DeathTimer, this, &AShooterNPC::DeferredDestruction, DeferredDestructionTime, false);
+        if (DeferredDestructionTime <= KINDA_SMALL_NUMBER)
+        {
+            DeferredDestruction();
+        }
+        else
+        {
+            GetWorld()->GetTimerManager().SetTimer(
+                DeathTimer, this, &AShooterNPC::DeferredDestruction, DeferredDestructionTime, false);
+        }
     }
 }
 
