@@ -14,6 +14,13 @@ bool FStateTreeLineOfSightToTargetCondition::TestCondition(FStateTreeExecutionCo
 {
 	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
+	if (!IsValid(InstanceData.Character) || !InstanceData.Character->GetWorld() ||
+		InstanceData.NumberOfVerticalLineOfSightChecks <= 0 ||
+		!InstanceData.Character->GetFirstPersonCameraComponent())
+	{
+		return false;
+	}
+
 	// ensure the target is valid
 	if (!IsValid(InstanceData.Target))
 	{
@@ -137,7 +144,10 @@ void FStateTreeFaceLocationTask::ExitState(FStateTreeExecutionContext& Context, 
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
 	// clear the AI Controller's focus
-	InstanceData.Controller->ClearFocus(EAIFocusPriority::Gameplay);
+	if (IsValid(InstanceData.Controller))
+	{
+		InstanceData.Controller->ClearFocus(EAIFocusPriority::Gameplay);
+	}
 }
 
 #if WITH_EDITOR
@@ -201,6 +211,11 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 	// get the instance data
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
+	if (!IsValid(InstanceData.Controller) || !IsValid(InstanceData.Character))
+	{
+		return EStateTreeRunStatus::Failed;
+	}
+
 	// bind the perception updated delegate on the controller
 	InstanceData.Controller->OnShooterPerceptionUpdated.BindLambda(
 		[WeakContext = Context.MakeWeakExecutionContext()](AActor* SensedActor, const FAIStimulus& Stimulus)
@@ -209,6 +224,12 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 			const FStateTreeStrongExecutionContext StrongContext = WeakContext.MakeStrongExecutionContext();
 			if (FInstanceDataType* LambdaInstanceData = StrongContext.GetInstanceDataPtr<FInstanceDataType>())
 			{
+				if (!IsValid(SensedActor) || !IsValid(LambdaInstanceData->Controller) ||
+					!IsValid(LambdaInstanceData->Character) || !LambdaInstanceData->Character->GetWorld())
+				{
+					return;
+				}
+
 				// have we sensed the enemy directly?
 				if (SensedActor->ActorHasTag(LambdaInstanceData->SenseTag))
 				{
@@ -300,6 +321,11 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 			const FStateTreeStrongExecutionContext StrongContext = WeakContext.MakeStrongExecutionContext();
 			if (FInstanceDataType* LambdaInstanceData = StrongContext.GetInstanceDataPtr<FInstanceDataType>())
 			{
+				if (!IsValid(SensedActor) || !IsValid(LambdaInstanceData->Controller))
+				{
+					return;
+				}
+
 				// reset the stimulus strength
 				LambdaInstanceData->LastStimulusStrength = 0.0f;
 
@@ -343,9 +369,12 @@ void FStateTreeSenseEnemiesTask::ExitState(FStateTreeExecutionContext& Context, 
 	// get the instance data
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
-	// unbind the perception delegates
-	InstanceData.Controller->OnShooterPerceptionUpdated.Unbind();
-	InstanceData.Controller->OnShooterPerceptionForgotten.Unbind();
+	// unbind the perception delegates if the controller is still valid
+	if (IsValid(InstanceData.Controller))
+	{
+		InstanceData.Controller->OnShooterPerceptionUpdated.Unbind();
+		InstanceData.Controller->OnShooterPerceptionForgotten.Unbind();
+	}
 }
 
 #if WITH_EDITOR
