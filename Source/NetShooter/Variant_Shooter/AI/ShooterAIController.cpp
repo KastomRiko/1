@@ -35,18 +35,27 @@ void AShooterAIController::OnPossess(APawn* InPawn)
 		// subscribe to the pawn's OnDeath delegate
 		NPC->OnPawnDeath.AddDynamic(this, &AShooterAIController::OnPawnDeath);
 
-		// start AI logic
-		StateTreeAI->StartLogic();
+		// start AI logic when the component is available
+		if (StateTreeAI)
+		{
+			StateTreeAI->StartLogic();
+		}
 	}
 }
 
 void AShooterAIController::OnPawnDeath()
 {
 	// stop movement
-	GetPathFollowingComponent()->AbortMove(*this, FPathFollowingResultFlags::UserAbort);
+	if (UPathFollowingComponent* PathFollowing = GetPathFollowingComponent())
+	{
+		PathFollowing->AbortMove(*this, FPathFollowingResultFlags::UserAbort);
+	}
 
 	// stop StateTree logic
-	StateTreeAI->StopLogic(FString(""));
+	if (StateTreeAI)
+	{
+		StateTreeAI->StopLogic(FString(""));
+	}
 
 	// unpossess the pawn
 	UnPossess();
