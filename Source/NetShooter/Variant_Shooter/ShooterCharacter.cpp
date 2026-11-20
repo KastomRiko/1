@@ -416,5 +416,5 @@ void AShooterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
     DOREPLIFETIME(AShooterCharacter, CurrentHP);
     DOREPLIFETIME(AShooterCharacter, TeamByte);
     DOREPLIFETIME(AShooterCharacter, OwnedWeapons);
-    DOREPLIFETIME_CONDITION(AShooterCharacter, CurrentWeapon, COND_OwnerOnly);
+    DOREPLIFETIME(AShooterCharacter, CurrentWeapon);
 }
