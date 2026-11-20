@@ -102,10 +102,7 @@ void FStateTreeFaceActorTask::ExitState(FStateTreeExecutionContext& Context, con
 	// clear the AI Controller's focus
 	if (IsValid(InstanceData.Controller))
 	{
-		if (IsValid(InstanceData.Controller))
-	{
 		InstanceData.Controller->ClearFocus(EAIFocusPriority::Gameplay);
-	}
 	}
 }
 
