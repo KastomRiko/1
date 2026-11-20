@@ -123,6 +123,13 @@ public:
 	/** Creates and initializes the scoreboard on the owning local player */
 	void InitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass);
 
+	/** Retries scoreboard initialization when the replicated GameState becomes available */
+	void OnShooterGameStateReady();
+
+	/** Widget class received from the server, retained until GameState is ready */
+	UPROPERTY(Transient)
+	TSubclassOf<UShooterUI> PendingShooterUIClass;
+
 	/** Requests the owning client to create its local scoreboard */
 	UFUNCTION(Client, Reliable)
 	void ClientInitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass);
