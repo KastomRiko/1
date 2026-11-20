@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "ShooterPlayerController.generated.h"
 
+class UUserWidget;
 class UInputMappingContext;
 class AShooterCharacter;
 class AShooterGameState;
