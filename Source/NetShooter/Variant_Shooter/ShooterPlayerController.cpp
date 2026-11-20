@@ -238,7 +238,7 @@ void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
 {
 	// Ignore destruction callbacks from pawns that this controller no longer possesses.
 	// This also protects against callbacks already queued during a possession change.
-	if (!HasAuthority() || !IsValid(DestroyedActor) || GetPawn() != DestroyedActor ||
+	if (!HasAuthority() || !DestroyedActor || GetPawn() != DestroyedActor ||
 		!GetWorld() || !CharacterClass)
 	{
 		return;
