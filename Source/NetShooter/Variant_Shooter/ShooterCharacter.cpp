@@ -77,6 +77,40 @@ void AShooterCharacter::OnRep_CurrentHP()
     OnDamaged.Broadcast(LifePercent);
 }
 
+void AShooterCharacter::OnRep_IsDead()
+{
+    if (bIsDead)
+    {
+        ApplyDeathState();
+    }
+}
+
+void AShooterCharacter::ApplyDeathState()
+{
+    if (bDeathPresentationApplied)
+    {
+        return;
+    }
+
+    bDeathPresentationApplied = true;
+
+    if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+    {
+        Movement->StopMovementImmediately();
+        Movement->DisableMovement();
+        Movement->SetComponentTickEnabled(false);
+    }
+
+    if (GetCapsuleComponent())
+    {
+        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+    DisableInput(Cast<APlayerController>(GetController()));
+    OnBulletCountUpdated.Broadcast(0, 0);
+    BP_OnDeath();
+}
+
 void AShooterCharacter::OnRep_TeamByte()
 {
 }
@@ -357,10 +391,13 @@ AShooterWeapon* AShooterCharacter::FindWeaponOfType(TSubclassOf<AShooterWeapon> 
 
 void AShooterCharacter::Die(AController* Killer)
 {
-    if (!HasAuthority() || IsDead())
+    if (!HasAuthority() || bIsDead)
     {
         return;
     }
+
+    bIsDead = true;
+    ForceNetUpdate();
 
     if (IsValid(CurrentWeapon))
     {
@@ -376,22 +413,7 @@ void AShooterCharacter::Die(AController* Killer)
     }
 
     Tags.AddUnique(DeathTag);
-
-    if (UCharacterMovementComponent* Movement = GetCharacterMovement())
-    {
-        Movement->StopMovementImmediately();
-        Movement->DisableMovement();
-        Movement->SetComponentTickEnabled(false);
-    }
-
-    if (GetCapsuleComponent())
-    {
-        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    }
-
-    DisableInput(Cast<APlayerController>(GetController()));
-    OnBulletCountUpdated.Broadcast(0, 0);
-    BP_OnDeath();
+    ApplyDeathState();
 
     if (GetWorld())
     {
@@ -414,6 +436,7 @@ void AShooterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AShooterCharacter, CurrentHP);
+    DOREPLIFETIME(AShooterCharacter, bIsDead);
     DOREPLIFETIME(AShooterCharacter, TeamByte);
     DOREPLIFETIME(AShooterCharacter, OwnedWeapons);
     DOREPLIFETIME(AShooterCharacter, CurrentWeapon);
