@@ -121,7 +121,16 @@ void AShooterCharacter::ApplyDeathState()
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 
-    DisableInput(Cast<APlayerController>(GetController()));
+    // Only disable input on the locally controlled owning player. Passing a null
+    // controller to DisableInput can affect the first local player in split-screen.
+    if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+    {
+        if (PlayerController->IsLocalController())
+        {
+            DisableInput(PlayerController);
+        }
+    }
+
     OnBulletCountUpdated.Broadcast(0, 0);
     BP_OnDeath();
 }
