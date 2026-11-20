@@ -156,6 +156,7 @@ public:
     UFUNCTION(BlueprintPure, Category="Team")
     uint8 GetTeamByte() const { return TeamByte; }
 
+    void RefreshHUDState();
     void SetTeam(uint8 Team);
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
