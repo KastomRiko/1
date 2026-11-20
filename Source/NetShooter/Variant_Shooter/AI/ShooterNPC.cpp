@@ -184,8 +184,7 @@ void AShooterNPC::Die()
         Weapon->DeactivateWeapon();
     }
 
-    Tags.AddUnique(DeathTag);
-    OnPawnDeath.Broadcast();
+    ApplyDeathState();
 
     if (GetWorld())
     {
@@ -193,7 +192,24 @@ void AShooterNPC::Die()
         {
             GameMode->IncrementTeamScore(TeamByte);
         }
+
+        GetWorld()->GetTimerManager().SetTimer(
+            DeathTimer, this, &AShooterNPC::DeferredDestruction, DeferredDestructionTime, false);
     }
+}
+
+void AShooterNPC::OnRep_IsDead()
+{
+    if (bIsDead)
+    {
+        ApplyDeathState();
+    }
+}
+
+void AShooterNPC::ApplyDeathState()
+{
+    Tags.AddUnique(DeathTag);
+    OnPawnDeath.Broadcast();
 
     if (GetCapsuleComponent())
     {
@@ -212,11 +228,6 @@ void AShooterNPC::Die()
         GetMesh()->SetCollisionProfileName(RagdollCollisionProfile);
         GetMesh()->SetSimulatePhysics(true);
         GetMesh()->SetPhysicsBlendWeight(1.0f);
-    }
-
-    if (GetWorld())
-    {
-        GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AShooterNPC::DeferredDestruction, DeferredDestructionTime, false);
     }
 }
 
