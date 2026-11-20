@@ -16,6 +16,7 @@
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
 #include "ShooterGameMode.h"
+#include "UObject/ConstructorHelpers.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -27,6 +28,13 @@ AShooterCharacter::AShooterCharacter()
     FirstPersonMesh->CastShadow = false;
 
     PawnNoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Pawn Noise Emitter"));
+
+    static ConstructorHelpers::FClassFinder<AShooterWeapon> DefaultStarterWeapon(
+        TEXT("/Game/Variant_Shooter/Blueprints/Pickups/Weapons/BP_ShooterWeapon_Rifle"));
+    if (DefaultStarterWeapon.Class)
+    {
+        StarterWeaponClass = DefaultStarterWeapon.Class;
+    }
 }
 
 void AShooterCharacter::BeginPlay()
@@ -36,6 +44,17 @@ void AShooterCharacter::BeginPlay()
     if (HasAuthority())
     {
         CurrentHP = MaxHP;
+
+        // Grant the starter weapon on the server so it replicates to every player.
+        // AddWeaponClass safely reuses an existing copy if a Blueprint also grants it.
+        if (StarterWeaponClass)
+        {
+            AddWeaponClass(StarterWeaponClass);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("ShooterCharacter has no valid StarterWeaponClass."));
+        }
     }
 
     OnDamaged.Broadcast(MaxHP > 0.0f ? 1.0f : 0.0f);
