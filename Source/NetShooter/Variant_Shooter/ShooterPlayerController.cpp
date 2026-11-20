@@ -9,12 +9,76 @@
 #include "GameFramework/PlayerStart.h"
 #include "ShooterCharacter.h"
 #include "ShooterBulletCounterUI.h"
+#include "ShooterUI.h"
+#include "ShooterGameState.h"
 #include "NetShooter.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 void AShooterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AShooterPlayerController::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (AShooterGameState* ShooterGameState = World->GetGameState<AShooterGameState>())
+		{
+			ShooterGameState->OnTeamScoreChanged.RemoveDynamic(this, &AShooterPlayerController::OnTeamScoreChanged);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+void AShooterPlayerController::ClientInitializeScoreboard_Implementation(TSubclassOf<UShooterUI> WidgetClass)
+{
+	InitializeScoreboard(WidgetClass);
+}
+
+void AShooterPlayerController::InitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass)
+{
+	if (!IsLocalController() || !WidgetClass)
+	{
+		return;
+	}
+
+	if (!IsValid(ShooterUI))
+	{
+		ShooterUI = CreateWidget<UShooterUI>(this, WidgetClass);
+		if (ShooterUI)
+		{
+			ShooterUI->AddToPlayerScreen(0);
+		}
+	}
+
+	if (!IsValid(ShooterUI))
+	{
+		UE_LOG(LogNetShooter, Error, TEXT("Could not create Shooter scoreboard widget."));
+		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (AShooterGameState* ShooterGameState = World->GetGameState<AShooterGameState>())
+		{
+			ShooterGameState->OnTeamScoreChanged.AddUniqueDynamic(this, &AShooterPlayerController::OnTeamScoreChanged);
+
+			for (const TPair<uint8, int32>& TeamScore : ShooterGameState->GetTeamScores())
+			{
+				ShooterUI->BP_UpdateScore(TeamScore.Key, TeamScore.Value);
+			}
+		}
+	}
+}
+
+void AShooterPlayerController::OnTeamScoreChanged(uint8 TeamByte, int32 Score)
+{
+	if (IsValid(ShooterUI))
+	{
+		ShooterUI->BP_UpdateScore(TeamByte, Score);
+	}
 }
 
 void AShooterPlayerController::SetupInputComponent()
