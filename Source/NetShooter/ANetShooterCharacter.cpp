@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
@@ -55,13 +56,12 @@ void ANetShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
     {
         if (MoveAction)
         {
-            EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this,
-                static_cast<void (ANetShooterCharacter::*)(const FVector2D&)>(&ANetShooterCharacter::DoMove));
+            EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ANetShooterCharacter::HandleMoveInput);
         }
 
         if (LookAction)
         {
-            EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANetShooterCharacter::DoLook);
+            EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANetShooterCharacter::HandleLookInput);
         }
 
         if (JumpAction)
@@ -115,6 +115,16 @@ void ANetShooterCharacter::EnablePlayerInput()
             EnableInput(PC);
         }
     }
+}
+
+void ANetShooterCharacter::HandleMoveInput(const FInputActionValue& Value)
+{
+    DoMove(Value.Get<FVector2D>());
+}
+
+void ANetShooterCharacter::HandleLookInput(const FInputActionValue& Value)
+{
+    DoLook(Value.Get<FVector2D>());
 }
 
 void ANetShooterCharacter::DoMove(const FVector2D& Value)
