@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "HorrorPlayerController.generated.h"
 
+class APawn;
 class UInputMappingContext;
 class UUserWidget;
 class UHorrorUI;
@@ -60,8 +61,14 @@ protected:
 	/** Gameplay Initialization */
 	virtual void BeginPlay() override;
 
-	/** Possessed pawn initialization */
-	virtual void OnPossess(APawn* aPawn) override;
+	/** Possessed pawn initialization on the server */
+	virtual void OnPossess(APawn* InPawn) override;
+
+	/** Possessed pawn replication on the owning client */
+	virtual void OnRep_Pawn() override;
+
+	/** Sets up the local horror HUD for the current pawn */
+	void SetupHorrorCharacterUI(APawn* InPawn);
 
 	/** Input mapping context setup */
 	virtual void SetupInputComponent() override;
