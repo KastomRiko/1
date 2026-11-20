@@ -3,6 +3,32 @@
 #include "ShooterGameState.h"
 
 #include "Net/UnrealNetwork.h"
+#include "Engine/World.h"
+#include "ShooterPlayerController.h"
+
+void AShooterGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// A client RPC can arrive before this replicated actor. Notify local controllers
+	// now so they can finish creating and binding their scoreboard widgets.
+	if (!HasAuthority())
+	{
+		if (UWorld* World = GetWorld())
+		{
+			for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+			{
+				if (AShooterPlayerController* ShooterPlayer = Cast<AShooterPlayerController>(It->Get()))
+				{
+					if (ShooterPlayer->IsLocalController())
+					{
+						ShooterPlayer->OnShooterGameStateReady();
+					}
+				}
+			}
+		}
+	}
+}
 
 void AShooterGameState::IncrementTeamScore(uint8 TeamByte)
 {
