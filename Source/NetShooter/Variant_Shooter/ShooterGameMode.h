@@ -41,9 +41,6 @@ protected:
 	/** Assigns each joining player to one of the two teams */
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
-	/** Team assigned to the next joining player */
-	uint8 NextTeamByte = 0;
-
 	/** Assigns a PlayerStart to a specific player */
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
