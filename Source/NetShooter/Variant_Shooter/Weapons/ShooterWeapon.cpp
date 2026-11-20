@@ -142,7 +142,9 @@ void AShooterWeapon::StopFiring()
 
 void AShooterWeapon::ServerStartFiring_Implementation()
 {
-    if (!HasAuthority() || !IsValid(GetOwner()) || !WeaponOwner || CurrentBullets <= 0 || IsHidden())
+    UWorld* World = GetWorld();
+    if (!HasAuthority() || !World || !IsValid(GetOwner()) || !WeaponOwner ||
+        !IsValid(PawnOwner) || CurrentBullets <= 0 || IsHidden())
     {
         return;
     }
@@ -155,7 +157,7 @@ void AShooterWeapon::ServerStartFiring_Implementation()
     bIsFiring = true;
 
     const float SafeRefireRate = FMath::Max(RefireRate, 0.01f);
-    const float TimeSinceLastShot = GetWorld()->GetTimeSeconds() - TimeOfLastShot;
+    const float TimeSinceLastShot = World->GetTimeSeconds() - TimeOfLastShot;
 
     if (TimeSinceLastShot >= SafeRefireRate)
     {
@@ -163,7 +165,7 @@ void AShooterWeapon::ServerStartFiring_Implementation()
     }
     else
     {
-        GetWorld()->GetTimerManager().SetTimer(
+        World->GetTimerManager().SetTimer(
             RefireTimer,
             this,
             &AShooterWeapon::FireCooldownExpired,
