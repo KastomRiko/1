@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -36,7 +36,7 @@ protected:
 	FName TeamTag = FName("Enemy");
 
 	/** Enemy currently being targeted */
-	TObjectPtr<AActor> TargetEnemy;
+	TWeakObjectPtr<AActor> TargetEnemy;
 
 public:
 
@@ -71,7 +71,7 @@ public:
 	void ClearCurrentTarget();
 
 	/** Returns the targeted enemy */
-	AActor* GetCurrentTarget() const { return TargetEnemy; };
+	AActor* GetCurrentTarget() const { return TargetEnemy.Get(); };
 
 protected:
 
@@ -79,7 +79,7 @@ protected:
 	UFUNCTION()
 	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
-	/** Called when the AI perception component forgets a given actor */
+	/** Called when the AI perception component forgets an actor */
 	UFUNCTION()
 	void OnPerceptionForgotten(AActor* Actor);
 };
