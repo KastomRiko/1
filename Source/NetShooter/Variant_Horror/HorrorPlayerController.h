@@ -7,6 +7,7 @@
 #include "HorrorPlayerController.generated.h"
 
 class UInputMappingContext;
+class UUserWidget;
 class UHorrorUI;
 
 /**
@@ -49,6 +50,7 @@ protected:
 	TSubclassOf<UUserWidget> MobileControlsWidgetClass;
 
 	/** Pointer to the mobile controls widget */
+	UPROPERTY()
 	TObjectPtr<UUserWidget> MobileControlsWidget;
 
 	/** If true, the player will use UMG touch controls even if not playing on mobile platforms */
