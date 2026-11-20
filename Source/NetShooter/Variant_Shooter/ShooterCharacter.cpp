@@ -443,7 +443,8 @@ void AShooterCharacter::OnRespawn()
 
 bool AShooterCharacter::IsDead() const
 {
-    return CurrentHP <= 0.0f;
+    // The replicated death flag may arrive before the updated health value.
+    return bIsDead || CurrentHP <= 0.0f;
 }
 
 void AShooterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
