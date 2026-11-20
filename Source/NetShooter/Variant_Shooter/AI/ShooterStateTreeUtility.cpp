@@ -333,9 +333,6 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 					return;
 				}
 
-				// reset the stimulus strength
-				LambdaInstanceData->LastStimulusStrength = 0.0f;
-
 				bool bForget = false;
 
 				// are we forgetting the current target?
@@ -354,6 +351,9 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 
 				if (bForget)
 				{
+					// Only reset investigation strength when the relevant target/stimulus is forgotten.
+					LambdaInstanceData->LastStimulusStrength = 0.0f;
+
 					// clear the target
 					LambdaInstanceData->TargetActor = nullptr;
 
