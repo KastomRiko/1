@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerStart.h"
 #include "ShooterPlayerController.h"
+#include "ShooterCharacter.h"
+#include "ShooterNPC.h"
 
 AShooterGameMode::AShooterGameMode()
 {
@@ -115,6 +117,46 @@ void AShooterGameMode::IncrementTeamScore(uint8 TeamByte)
 	if (AShooterGameState* ShooterGameState = GetGameState<AShooterGameState>())
 	{
 		ShooterGameState->IncrementTeamScore(TeamByte);
+	}
+}
+
+void AShooterGameMode::IncrementTeamScoreForController(AController* ScoringController)
+{
+	if (!HasAuthority() || !IsValid(ScoringController))
+	{
+		return;
+	}
+
+	uint8 ScoringTeam = 0;
+	bool bFoundScoringTeam = false;
+
+	if (APawn* ScoringPawn = ScoringController->GetPawn())
+	{
+		if (const AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(ScoringPawn))
+		{
+			ScoringTeam = ShooterCharacter->GetTeamByte();
+			bFoundScoringTeam = true;
+		}
+		else if (const AShooterNPC* ShooterNPC = Cast<AShooterNPC>(ScoringPawn))
+		{
+			ScoringTeam = ShooterNPC->GetTeamByte();
+			bFoundScoringTeam = true;
+		}
+	}
+
+	// A PlayerController may already have a team assigned before its pawn is possessed.
+	if (!bFoundScoringTeam)
+	{
+		if (const AShooterPlayerController* ShooterPlayer = Cast<AShooterPlayerController>(ScoringController))
+		{
+			ScoringTeam = ShooterPlayer->GetTeamByte();
+			bFoundScoringTeam = true;
+		}
+	}
+
+	if (bFoundScoringTeam)
+	{
+		IncrementTeamScore(ScoringTeam);
 	}
 }
 
