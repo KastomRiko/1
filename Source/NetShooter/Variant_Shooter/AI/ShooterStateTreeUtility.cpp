@@ -230,6 +230,13 @@ EStateTreeRunStatus FStateTreeSenseEnemiesTask::EnterState(FStateTreeExecutionCo
 					return;
 				}
 
+				// Perception updates also report when a stimulus is lost. Do not reacquire
+				// an enemy or investigate an old noise from an unsuccessful stimulus.
+				if (!Stimulus.WasSuccessfullySensed())
+				{
+					return;
+				}
+
 				// have we sensed the enemy directly?
 				if (SensedActor->ActorHasTag(LambdaInstanceData->SenseTag))
 				{
