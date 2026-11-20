@@ -117,6 +117,9 @@ public:
 	/** Assigns a team ID to this player */
 	void SetTeam(uint8 Team);
 
+	/** Returns this player's server-assigned team ID */
+	uint8 GetTeamByte() const { return TeamByte; }
+
 	/** Creates and initializes the scoreboard on the owning local player */
 	void InitializeScoreboard(TSubclassOf<UShooterUI> WidgetClass);
 
