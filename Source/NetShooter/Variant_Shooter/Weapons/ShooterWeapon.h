@@ -71,7 +71,6 @@ protected:
     bool bIsFiring = false;
 
     FTimerHandle RefireTimer;
-
     TObjectPtr<APawn> PawnOwner;
 
     UPROPERTY(EditAnywhere, Category="Perception", meta=(ClampMin=0, ClampMax=100))
@@ -89,6 +88,9 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+    virtual void OnRep_Owner() override;
+
+    void InitializeWeaponOwner();
 
     UFUNCTION()
     void OnOwnerDestroyed(AActor* DestroyedActor);
@@ -99,8 +101,6 @@ protected:
 public:
     void ActivateWeapon(const FName& OwnerTag);
     void DeactivateWeapon();
-
-    /** Client entry point; the server validates and performs the shot. */
     void StartFiring();
     void StopFiring();
 
@@ -128,7 +128,6 @@ public:
 
     const TSubclassOf<UAnimInstance>& GetFirstPersonAnimInstanceClass() const;
     const TSubclassOf<UAnimInstance>& GetThirdPersonAnimInstanceClass() const;
-
     int32 GetMagazineSize() const { return MagazineSize; }
     int32 GetBulletCount() const { return CurrentBullets; }
 
