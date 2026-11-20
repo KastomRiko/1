@@ -86,6 +86,9 @@ protected:
 	/** Called when it's time to respawn this pickup */
 	void RespawnPickup();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRespawnPickup();
+
 	/** Passes control to Blueprint to animate the pickup respawn. Should end by calling FinishRespawn */
 	UFUNCTION(BlueprintImplementableEvent, Category="Pickup", meta = (DisplayName = "OnRespawn"))
 	void BP_OnRespawn();
