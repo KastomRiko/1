@@ -303,13 +303,19 @@ FTransform AShooterWeapon::CalculateProjectileSpawnTransform(const FVector& Targ
 {
     FTransform MuzzleTransform = GetActorTransform();
 
-    if (FirstPersonMesh && !MuzzleSocketName.IsNone() && FirstPersonMesh->DoesSocketExist(MuzzleSocketName))
+    const bool bUseFirstPersonMesh = PawnOwner && PawnOwner->IsPlayerControlled();
+
+    if (bUseFirstPersonMesh && FirstPersonMesh && !MuzzleSocketName.IsNone() && FirstPersonMesh->DoesSocketExist(MuzzleSocketName))
     {
         MuzzleTransform = FirstPersonMesh->GetSocketTransform(MuzzleSocketName);
     }
     else if (ThirdPersonMesh && !MuzzleSocketName.IsNone() && ThirdPersonMesh->DoesSocketExist(MuzzleSocketName))
     {
         MuzzleTransform = ThirdPersonMesh->GetSocketTransform(MuzzleSocketName);
+    }
+    else if (FirstPersonMesh && !MuzzleSocketName.IsNone() && FirstPersonMesh->DoesSocketExist(MuzzleSocketName))
+    {
+        MuzzleTransform = FirstPersonMesh->GetSocketTransform(MuzzleSocketName);
     }
 
     FVector Direction = (TargetLocation - MuzzleTransform.GetLocation()).GetSafeNormal();
