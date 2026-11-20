@@ -92,19 +92,20 @@ void AHorrorCharacter::DoStartSprint()
 
 void AHorrorCharacter::DoEndSprint()
 {
-	// set the sprinting flag
+	const bool bWasSprinting = bSprinting;
 	bSprinting = false;
 
-	// are we out of recovery?
+	// Keep the reduced recovery speed until the stamina meter is full.
 	if (!bRecovering)
 	{
-		// set the default walk speed
 		if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 		{
 			Movement->MaxWalkSpeed = WalkSpeed;
 		}
+	}
 
-		// call the sprint state changed delegate
+	if (bWasSprinting)
+	{
 		OnSprintStateChanged.Broadcast(false);
 	}
 }
@@ -123,8 +124,9 @@ void AHorrorCharacter::SprintFixedTick()
 		// have we run out of stamina?
 		if (SprintMeter <= 0.0f)
 		{
-			// raise the recovering flag
+			// raise the recovering flag and notify the UI that sprinting has stopped
 			bRecovering = true;
+			OnSprintStateChanged.Broadcast(false);
 
 			// set the recovering walk speed
 			if (UCharacterMovementComponent* Movement = GetCharacterMovement())
