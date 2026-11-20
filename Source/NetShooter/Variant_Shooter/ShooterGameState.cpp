@@ -11,19 +11,24 @@ void AShooterGameState::IncrementTeamScore(uint8 TeamByte)
 		return;
 	}
 
-	int32& Score = TeamScores.FindOrAdd(TeamByte);
-	++Score;
+	// Team IDs are used as array indices; expand for any newly introduced team.
+	if (TeamScores.Num() <= static_cast<int32>(TeamByte))
+	{
+		TeamScores.SetNum(static_cast<int32>(TeamByte) + 1);
+	}
+
+	const int32 NewScore = ++TeamScores[static_cast<int32>(TeamByte)];
 
 	// Broadcast locally for listen-server players; clients receive the RepNotify.
-	OnTeamScoreChanged.Broadcast(TeamByte, Score);
+	OnTeamScoreChanged.Broadcast(TeamByte, NewScore);
 	ForceNetUpdate();
 }
 
 void AShooterGameState::OnRep_TeamScores()
 {
-	for (const TPair<uint8, int32>& TeamScore : TeamScores)
+	for (int32 TeamIndex = 0; TeamIndex < TeamScores.Num(); ++TeamIndex)
 	{
-		OnTeamScoreChanged.Broadcast(TeamScore.Key, TeamScore.Value);
+		OnTeamScoreChanged.Broadcast(static_cast<uint8>(TeamIndex), TeamScores[TeamIndex]);
 	}
 }
 
