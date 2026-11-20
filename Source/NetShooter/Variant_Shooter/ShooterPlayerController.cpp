@@ -71,6 +71,9 @@ void AShooterPlayerController::SetupInputComponent()
 			UE_LOG(LogNetShooter, Error, TEXT("Could not spawn bullet counter widget."));
 
 		}
+
+		// The pawn may already be replicated before the local HUD is created.
+		BindToShooterCharacter(GetPawn());
 	}
 }
 
@@ -78,25 +81,72 @@ void AShooterPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	// subscribe to the pawn's OnDestroyed delegate
-	InPawn->OnDestroyed.AddDynamic(this, &AShooterPlayerController::OnPawnDestroyed);
+	if (IsValid(InPawn))
+	{
+		// Respawn handling is authoritative and is registered only on the server.
+		InPawn->OnDestroyed.AddUniqueDynamic(this, &AShooterPlayerController::OnPawnDestroyed);
+	}
 
-	// is this a shooter character?
 	if (AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(InPawn))
 	{
-		// add the player tag
-		ShooterCharacter->Tags.Add(PlayerPawnTag);
-
-		// set the team
+		ShooterCharacter->Tags.AddUnique(PlayerPawnTag);
 		ShooterCharacter->SetTeam(TeamByte);
-
-		// subscribe to the pawn's delegates
-		ShooterCharacter->OnBulletCountUpdated.AddDynamic(this, &AShooterPlayerController::OnBulletCountUpdated);
-		ShooterCharacter->OnDamaged.AddDynamic(this, &AShooterPlayerController::OnPawnDamaged);
-
-		// force update the life bar
-		ShooterCharacter->OnDamaged.Broadcast(1.0f);
 	}
+
+	BindToShooterCharacter(InPawn);
+}
+
+void AShooterPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+	BindToShooterCharacter(GetPawn());
+}
+
+void AShooterPlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+	UnbindFromShooterCharacter();
+}
+
+void AShooterPlayerController::BindToShooterCharacter(APawn* InPawn)
+{
+	AShooterCharacter* NewCharacter = Cast<AShooterCharacter>(InPawn);
+
+	if (BoundShooterCharacter.Get() == NewCharacter)
+	{
+		if (IsValid(NewCharacter))
+		{
+			NewCharacter->RefreshHUDState();
+		}
+		return;
+	}
+
+	UnbindFromShooterCharacter();
+
+	if (!IsValid(NewCharacter))
+	{
+		if (IsLocalController() && IsValid(BulletCounterUI))
+		{
+			BulletCounterUI->BP_UpdateBulletCounter(0, 0);
+		}
+		return;
+	}
+
+	BoundShooterCharacter = NewCharacter;
+	NewCharacter->OnBulletCountUpdated.AddUniqueDynamic(this, &AShooterPlayerController::OnBulletCountUpdated);
+	NewCharacter->OnDamaged.AddUniqueDynamic(this, &AShooterPlayerController::OnPawnDamaged);
+	NewCharacter->RefreshHUDState();
+}
+
+void AShooterPlayerController::UnbindFromShooterCharacter()
+{
+	if (AShooterCharacter* PreviousCharacter = BoundShooterCharacter.Get())
+	{
+		PreviousCharacter->OnBulletCountUpdated.RemoveDynamic(this, &AShooterPlayerController::OnBulletCountUpdated);
+		PreviousCharacter->OnDamaged.RemoveDynamic(this, &AShooterPlayerController::OnPawnDamaged);
+	}
+
+	BoundShooterCharacter.Reset();
 }
 
 void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
