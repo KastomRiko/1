@@ -34,7 +34,13 @@ AShooterNPCSpawner::AShooterNPCSpawner()
 void AShooterNPCSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// NPCs must only be spawned by the authoritative server.
+	if (!HasAuthority() || !GetWorld())
+	{
+		return;
+	}
+
 	// ignore if enemies are disabled at the GameMode level
 	if (AShooterGameMode* GM = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
@@ -54,16 +60,22 @@ void AShooterNPCSpawner::BeginPlay()
 
 void AShooterNPCSpawner::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnTimer);
+	}
 	Super::EndPlay(EndPlayReason);
-
-	// clear the spawn timer
-	GetWorld()->GetTimerManager().ClearTimer(SpawnTimer);
 }
 
 void AShooterNPCSpawner::SpawnNPC()
 {
+	if (!HasAuthority() || !GetWorld() || SpawnCount <= 0)
+	{
+		return;
+	}
+
 	// ensure the NPC class is valid
-	if (IsValid(NPCClass))
+	if (IsValid(NPCClass) && SpawnCapsule)
 	{
 		// spawn the NPC at the reference capsule's transform
 		FActorSpawnParameters SpawnParams;
@@ -82,6 +94,11 @@ void AShooterNPCSpawner::SpawnNPC()
 
 void AShooterNPCSpawner::OnNPCDied()
 {
+	if (!HasAuthority() || !GetWorld())
+	{
+		return;
+	}
+
 	// decrease the spawn counter
 	--SpawnCount;
 
