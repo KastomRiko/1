@@ -87,11 +87,11 @@ void AShooterPlayerController::OnShooterGameStateReady()
 	}
 }
 
-void AShooterPlayerController::OnTeamScoreChanged(uint8 TeamByte, int32 Score)
+void AShooterPlayerController::OnTeamScoreChanged(uint8 ChangedTeamByte, int32 Score)
 {
 	if (IsValid(ShooterUI))
 	{
-		ShooterUI->BP_UpdateScore(TeamByte, Score);
+		ShooterUI->BP_UpdateScore(ChangedTeamByte, Score);
 	}
 }
 
