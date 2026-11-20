@@ -138,6 +138,7 @@ void AHorrorCharacter::SprintFixedTick()
 	}
 
 	// broadcast the sprint meter updated delegate
-	OnSprintMeterUpdated.Broadcast(SprintMeter / SprintTime);
+	const float SafeSprintTime = FMath::Max(SprintTime, KINDA_SMALL_NUMBER);
+	OnSprintMeterUpdated.Broadcast(FMath::Clamp(SprintMeter / SafeSprintTime, 0.0f, 1.0f));
 
 }
