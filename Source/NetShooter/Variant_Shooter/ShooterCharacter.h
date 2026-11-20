@@ -18,11 +18,6 @@ class UAnimInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FBulletCountUpdatedDelegate, int32, MagazineSize, int32, Bullets);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDamagedDelegate, float, LifePercent);
 
-/**
- * Player controllable first person shooter character.
- * Inherits network health/teams/death + camera/movement/input from ANetShooterCharacter.
- * Adds the first-person arms mesh and weapon inventory.
- */
 UCLASS(abstract)
 class NETSHOOTER_API AShooterCharacter : public ANetShooterCharacter, public IShooterWeaponHolder
 {
@@ -98,6 +93,9 @@ protected:
 
     UFUNCTION()
     void OnRep_CurrentWeapon();
+
+    UFUNCTION(Server, Reliable)
+    void ServerSwitchWeapon();
 
     virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
