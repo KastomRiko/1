@@ -161,6 +161,10 @@ void AShooterPlayerController::OnPossess(APawn* InPawn)
 
 	if (IsValid(InPawn))
 	{
+		// Remember the exact pawn associated with this callback. A stale
+		// destruction notification must never respawn a different possession.
+		PawnWithRespawnBinding = InPawn;
+
 		// Respawn handling is authoritative and is registered only on the server.
 		InPawn->OnDestroyed.AddUniqueDynamic(this, &AShooterPlayerController::OnPawnDestroyed);
 	}
@@ -191,6 +195,11 @@ void AShooterPlayerController::OnUnPossess()
 		if (!PreviousPawn->IsActorBeingDestroyed())
 		{
 			PreviousPawn->OnDestroyed.RemoveDynamic(this, &AShooterPlayerController::OnPawnDestroyed);
+
+			if (PawnWithRespawnBinding.Get() == PreviousPawn)
+			{
+				PawnWithRespawnBinding = nullptr;
+			}
 		}
 	}
 
@@ -241,9 +250,16 @@ void AShooterPlayerController::UnbindFromShooterCharacter()
 
 void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
 {
-	// This callback is detached during normal unpossession, but deliberately
-	// retained while the pawn is being destroyed and the controller releases it.
-	if (!HasAuthority() || !DestroyedActor || !GetWorld() || !CharacterClass)
+	// Only the pawn currently registered for respawn may trigger this callback.
+	// Clear the identity before spawning so this destruction can be handled once.
+	if (!HasAuthority() || !DestroyedActor || PawnWithRespawnBinding.Get() != DestroyedActor)
+	{
+		return;
+	}
+
+	PawnWithRespawnBinding = nullptr;
+
+	if (!GetWorld() || !CharacterClass)
 	{
 		return;
 	}
