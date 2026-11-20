@@ -2,22 +2,20 @@
 
 
 #include "Variant_Shooter/ShooterGameMode.h"
-#include "ShooterUI.h"
+#include "ShooterGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "ShooterPlayerController.h"
+
+AShooterGameMode::AShooterGameMode()
+{
+	GameStateClass = AShooterGameState::StaticClass();
+}
 
 void AShooterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// create the UI
-	if ((ShooterUI = CreateWidget<UShooterUI>(UGameplayStatics::GetPlayerController(GetWorld(), 0), ShooterUIClass)))
-	{
-		ShooterUI->AddToViewport(0);
-	}
 
 	// create each additional local player.
 	// Player 0 will be created automatically as part of regular game init
@@ -43,6 +41,16 @@ void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
 	{
 		ShooterPlayer->SetTeam(NextTeamByte);
 		NextTeamByte = static_cast<uint8>(1 - NextTeamByte);
+
+		// The scoreboard widget must be created by each owning local player.
+		if (ShooterPlayer->IsLocalController())
+		{
+			ShooterPlayer->InitializeScoreboard(ShooterUIClass);
+		}
+		else
+		{
+			ShooterPlayer->ClientInitializeScoreboard(ShooterUIClass);
+		}
 	}
 }
 
@@ -77,21 +85,14 @@ AActor* AShooterGameMode::ChoosePlayerStart_Implementation(AController* Player)
 
 void AShooterGameMode::IncrementTeamScore(uint8 TeamByte)
 {
-	// retrieve the team score if any
-	int32 Score = 0;
-	if (int32* FoundScore = TeamScores.Find(TeamByte))
+	if (!HasAuthority())
 	{
-		Score = *FoundScore;
+		return;
 	}
 
-	// increment the score for the given team
-	++Score;
-	TeamScores.Add(TeamByte, Score);
-
-	// update the UI
-	if (ShooterUI)
+	if (AShooterGameState* ShooterGameState = GetGameState<AShooterGameState>())
 	{
-		ShooterUI->BP_UpdateScore(TeamByte, Score);
+		ShooterGameState->IncrementTeamScore(TeamByte);
 	}
 }
 
