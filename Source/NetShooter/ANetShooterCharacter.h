@@ -10,6 +10,7 @@ class UInputComponent;
 class UInputMappingContext;
 class UInputAction;
 class ANetShooterWeapon;
+struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterDamagedDelegate, float, Damage, AController*, Instigator);
 
@@ -41,6 +42,8 @@ public:
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:
+    void HandleMoveInput(const FInputActionValue& Value);
+    void HandleLookInput(const FInputActionValue& Value);
     virtual void BeginPlay() override;
     virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
     virtual FVector GetWeaponCameraLocation() const;
