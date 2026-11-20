@@ -159,9 +159,14 @@ void AShooterProjectile::ProcessHit(AActor* HitActor, UPrimitiveComponent* HitCo
         if (!bIsOwner || bDamageOwner)
         {
             AController* InstigatorController = GetInstigator() ? GetInstigator()->GetController() : nullptr;
+            TSubclassOf<UDamageType> DamageTypeClass = HitDamageType;
+            if (!DamageTypeClass)
+            {
+                DamageTypeClass = UDamageType::StaticClass();
+            }
+
             UGameplayStatics::ApplyDamage(
-                HitCharacter, HitDamage, InstigatorController, this,
-                HitDamageType ? HitDamageType : UDamageType::StaticClass());
+                HitCharacter, HitDamage, InstigatorController, this, DamageTypeClass);
         }
     }
 
