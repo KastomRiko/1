@@ -36,6 +36,10 @@ protected:
     UPROPERTY(EditAnywhere, Category="Input")
     TObjectPtr<UInputAction> SwitchWeaponAction;
 
+    // Weapon granted automatically to every player by the authoritative server.
+    UPROPERTY(EditDefaultsOnly, Category="Weapons")
+    TSubclassOf<AShooterWeapon> StarterWeaponClass;
+
     UPROPERTY(EditAnywhere, Category="Weapons")
     FName FirstPersonWeaponSocket = FName("HandGrip_R");
 
