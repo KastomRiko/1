@@ -182,6 +182,13 @@ void AShooterPlayerController::OnRep_Pawn()
 
 void AShooterPlayerController::OnUnPossess()
 {
+	// Remove the respawn callback from the pawn before releasing possession.
+	// Otherwise, destroying a previously possessed pawn could respawn an extra character.
+	if (APawn* PreviousPawn = GetPawn())
+	{
+		PreviousPawn->OnDestroyed.RemoveDynamic(this, &AShooterPlayerController::OnPawnDestroyed);
+	}
+
 	Super::OnUnPossess();
 	UnbindFromShooterCharacter();
 }
@@ -229,8 +236,10 @@ void AShooterPlayerController::UnbindFromShooterCharacter()
 
 void AShooterPlayerController::OnPawnDestroyed(AActor* DestroyedActor)
 {
-	// Respawning must be performed by the server, not independently on each client.
-	if (!HasAuthority() || !GetWorld() || !CharacterClass)
+	// Ignore destruction callbacks from pawns that this controller no longer possesses.
+	// This also protects against callbacks already queued during a possession change.
+	if (!HasAuthority() || !IsValid(DestroyedActor) || GetPawn() != DestroyedActor ||
+		!GetWorld() || !CharacterClass)
 	{
 		return;
 	}
