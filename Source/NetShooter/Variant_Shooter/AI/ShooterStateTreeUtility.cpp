@@ -57,7 +57,7 @@ bool FStateTreeLineOfSightToTargetCondition::TestCondition(FStateTreeExecutionCo
 	FHitResult OutHit;
 
 	// run a number of vertically offset line traces to the target location
-	for (int32 i = 0; i < InstanceData.NumberOfVerticalLineOfSightChecks - 1; ++i)
+	for (int32 i = 0; i < InstanceData.NumberOfVerticalLineOfSightChecks; ++i)
 	{
 		// calculate the endpoint for the trace
 		const FVector End = CenterOfMass + FVector(0.0f, 0.0f, Extent.Z - ExtentZOffset * i);
