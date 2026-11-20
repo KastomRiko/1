@@ -77,6 +77,21 @@ void AShooterCharacter::OnRep_CurrentHP()
     OnDamaged.Broadcast(LifePercent);
 }
 
+void AShooterCharacter::RefreshHUDState()
+{
+    const float LifePercent = MaxHP > 0.0f ? FMath::Clamp(CurrentHP / MaxHP, 0.0f, 1.0f) : 0.0f;
+    OnDamaged.Broadcast(LifePercent);
+
+    if (IsValid(CurrentWeapon))
+    {
+        OnBulletCountUpdated.Broadcast(CurrentWeapon->GetMagazineSize(), CurrentWeapon->GetBulletCount());
+    }
+    else
+    {
+        OnBulletCountUpdated.Broadcast(0, 0);
+    }
+}
+
 void AShooterCharacter::OnRep_IsDead()
 {
     if (bIsDead)
