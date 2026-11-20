@@ -423,7 +423,7 @@ void AShooterCharacter::Die(AController* Killer)
     {
         if (AShooterGameMode* GameMode = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
         {
-            GameMode->IncrementTeamScore(TeamByte);
+            GameMode->IncrementTeamScoreForController(Killer);
         }
     }
 
