@@ -26,6 +26,8 @@ protected:
 
 public:
 
+	virtual void BeginPlay() override;
+
 	UPROPERTY(BlueprintAssignable, Category="Shooter")
 	FShooterTeamScoreChanged OnTeamScoreChanged;
 
