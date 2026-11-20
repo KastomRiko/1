@@ -36,7 +36,14 @@ void AHorrorPlayerController::OnPossess(APawn* aPawn)
 			if (!HorrorUI)
 			{
 				HorrorUI = CreateWidget<UHorrorUI>(this, HorrorUIClass);
-				HorrorUI->AddToPlayerScreen(0);
+				if (HorrorUI)
+				{
+					HorrorUI->AddToPlayerScreen(0);
+				}
+				else
+				{
+					UE_LOG(LogNetShooter, Error, TEXT("Could not create Horror UI widget."));
+				}
 			}
 
 			HorrorUI->SetupCharacter(HorrorCharacter);
