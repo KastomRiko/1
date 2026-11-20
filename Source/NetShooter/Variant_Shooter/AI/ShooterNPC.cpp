@@ -106,9 +106,9 @@ FVector AShooterNPC::GetWeaponTargetLocation()
     const FVector AimSource = Camera->GetComponentLocation();
     FVector AimDirection;
 
-    if (IsValid(CurrentAimTarget))
+    if (AActor* AimTargetActor = CurrentAimTarget.Get())
     {
-        FVector AimTarget = CurrentAimTarget->GetActorLocation();
+        FVector AimTarget = AimTargetActor->GetActorLocation();
         AimTarget.Z += FMath::RandRange(FMath::Min(MinAimOffsetZ, MaxAimOffsetZ), FMath::Max(MinAimOffsetZ, MaxAimOffsetZ));
         AimDirection = (AimTarget - AimSource).GetSafeNormal();
     }
@@ -259,6 +259,7 @@ void AShooterNPC::StopShooting()
     }
 
     bIsShooting = false;
+    CurrentAimTarget.Reset();
 
     if (IsValid(Weapon))
     {
