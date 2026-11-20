@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Variant_Horror/HorrorPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputSubsystems.h"
@@ -23,37 +22,47 @@ void AHorrorPlayerController::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AHorrorPlayerController::OnPossess(APawn* aPawn)
+void AHorrorPlayerController::OnPossess(APawn* InPawn)
 {
-	Super::OnPossess(aPawn);
+	Super::OnPossess(InPawn);
+	SetupHorrorCharacterUI(InPawn);
+}
 
-	// only spawn UI on local player controllers
-	if (IsLocalPlayerController())
+void AHorrorPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+	SetupHorrorCharacterUI(GetPawn());
+}
+
+void AHorrorPlayerController::SetupHorrorCharacterUI(APawn* InPawn)
+{
+	// Only the owning local player should create and bind its HUD.
+	if (!IsLocalPlayerController())
 	{
-		// set up the UI for the character
-		if (AHorrorCharacter* HorrorCharacter = Cast<AHorrorCharacter>(aPawn))
-		{
-			// create the UI
-			if (!HorrorUI)
-			{
-				HorrorUI = CreateWidget<UHorrorUI>(this, HorrorUIClass);
-				if (HorrorUI)
-				{
-					HorrorUI->AddToPlayerScreen(0);
-				}
-				else
-				{
-					UE_LOG(LogNetShooter, Error, TEXT("Could not create Horror UI widget."));
-				}
-			}
+		return;
+	}
 
-			if (HorrorUI)
-			{
-				HorrorUI->SetupCharacter(HorrorCharacter);
-			}
+	AHorrorCharacter* HorrorCharacter = Cast<AHorrorCharacter>(InPawn);
+
+	// Create the HUD when a horror character is first possessed.
+	if (HorrorCharacter && !HorrorUI)
+	{
+		HorrorUI = CreateWidget<UHorrorUI>(this, HorrorUIClass);
+		if (HorrorUI)
+		{
+			HorrorUI->AddToPlayerScreen(0);
+		}
+		else
+		{
+			UE_LOG(LogNetShooter, Error, TEXT("Could not create Horror UI widget."));
 		}
 	}
-	
+
+	// Passing nullptr also unbinds the previous character after unpossession.
+	if (HorrorUI)
+	{
+		HorrorUI->SetupCharacter(HorrorCharacter);
+	}
 }
 
 void AHorrorPlayerController::SetupInputComponent()
@@ -90,13 +99,11 @@ void AHorrorPlayerController::SetupInputComponent()
 			{
 				// add the controls to the player screen
 				MobileControlsWidget->AddToPlayerScreen(0);
-
-			} else {
-
-				UE_LOG(LogNetShooter, Error, TEXT("Could not spawn mobile controls widget."));
-
 			}
-
+			else
+			{
+				UE_LOG(LogNetShooter, Error, TEXT("Could not spawn mobile controls widget."));
+			}
 		}
 	}
 }
