@@ -99,7 +99,10 @@ void ANetShooterCharacter::DisablePlayerInput()
 {
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        DisableInput(PC);
+        if (PC->IsLocalController())
+        {
+            DisableInput(PC);
+        }
     }
 }
 
@@ -107,7 +110,10 @@ void ANetShooterCharacter::EnablePlayerInput()
 {
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        EnableInput(PC);
+        if (PC->IsLocalController())
+        {
+            EnableInput(PC);
+        }
     }
 }
 
