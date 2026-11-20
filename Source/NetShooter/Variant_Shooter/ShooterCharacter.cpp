@@ -9,6 +9,8 @@
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
