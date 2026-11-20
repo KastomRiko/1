@@ -25,6 +25,10 @@ void AShooterNPC::BeginPlay()
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
         Weapon = GetWorld()->SpawnActor<AShooterWeapon>(WeaponClass, GetActorTransform(), SpawnParams);
+        if (IsValid(Weapon))
+        {
+            Weapon->ActivateWeapon(NAME_None);
+        }
     }
 }
 
