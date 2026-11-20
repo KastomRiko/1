@@ -55,12 +55,22 @@ public:
     void DisablePlayerInput();
     UFUNCTION(BlueprintCallable, Category="Character")
     void EnablePlayerInput();
+    // Keep these reflected functions available to existing Blueprint assets.
+    UFUNCTION(BlueprintCallable, Category="Input")
+    virtual void DoJumpStart();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    virtual void DoJumpEnd();
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    virtual void DoAim(float Yaw, float Pitch);
+
+    UFUNCTION(BlueprintCallable, Category="Input")
+    virtual void DoMove(float Right, float Forward);
+
+    // Native Enhanced Input helpers; these are not exposed to Blueprint.
     virtual void DoMove(const FVector2D& Value);
     virtual void DoLook(const FVector2D& Value);
-    virtual void DoJumpStart();
-    virtual void DoJumpEnd();
-    virtual void DoAim(float Yaw, float Pitch);
-    virtual void DoMove(float Right, float Forward);
     UFUNCTION(BlueprintCallable, Category="Character")
     virtual void EquipWeapon(class ANetShooterWeapon* Weapon);
 };
