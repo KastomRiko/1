@@ -62,7 +62,7 @@ protected:
 
     bool bIsShooting = false;
 
-    UPROPERTY(Replicated)
+    UPROPERTY(ReplicatedUsing=OnRep_IsDead)
     bool bIsDead = false;
 
     FTimerHandle DeathTimer;
@@ -88,6 +88,10 @@ public:
     virtual void OnSemiWeaponRefire() override;
 
 protected:
+    UFUNCTION()
+    void OnRep_IsDead();
+
+    void ApplyDeathState();
     void Die();
     void DeferredDestruction();
 
