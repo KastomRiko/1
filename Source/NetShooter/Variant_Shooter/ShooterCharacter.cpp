@@ -20,6 +20,7 @@ AShooterCharacter::AShooterCharacter()
     FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
     FirstPersonMesh->SetupAttachment(FirstPersonCamera);
     FirstPersonMesh->SetCollisionProfileName(TEXT("NoCollision"));
+    FirstPersonMesh->SetFirstPersonPrimitiveType(EFirstPersonPrimitiveType::FirstPerson);
     FirstPersonMesh->bOnlyOwnerSee = true;
     FirstPersonMesh->CastShadow = false;
 
