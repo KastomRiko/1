@@ -54,7 +54,14 @@ void AShooterNPCSpawner::BeginPlay()
 	if (SpawnCount > 0)
 	{
 		// schedule the first NPC spawn
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AShooterNPCSpawner::SpawnNPC, InitialSpawnDelay);
+		if (InitialSpawnDelay <= KINDA_SMALL_NUMBER)
+		{
+			SpawnNPC();
+		}
+		else
+		{
+			GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AShooterNPCSpawner::SpawnNPC, InitialSpawnDelay);
+		}
 	}
 }
 
@@ -115,5 +122,12 @@ void AShooterNPCSpawner::OnNPCDied()
 	}
 
 	// schedule the next NPC spawn
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AShooterNPCSpawner::SpawnNPC, RespawnDelay);
+	if (RespawnDelay <= KINDA_SMALL_NUMBER)
+	{
+		SpawnNPC();
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AShooterNPCSpawner::SpawnNPC, RespawnDelay);
+	}
 }
