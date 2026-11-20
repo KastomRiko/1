@@ -41,6 +41,9 @@ protected:
 	/** Assigns each joining player to one of the two teams */
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+	/** Tie-breaker used when both teams have the same number of players */
+	uint8 NextTeamByte = 0;
+
 	/** Assigns a PlayerStart to a specific player */
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
