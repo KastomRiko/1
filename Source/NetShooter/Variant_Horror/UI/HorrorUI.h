@@ -32,6 +32,9 @@ public:
 
 protected:
 
+	/** Character currently providing sprint updates */
+	TWeakObjectPtr<AHorrorCharacter> BoundCharacter;
+
 	/** Passes control to Blueprint to update the sprint meter widgets */
 	UFUNCTION(BlueprintImplementableEvent, Category="Horror", meta = (DisplayName = "Sprint Meter Updated"))
 	void BP_SprintMeterUpdated(float Percent);
