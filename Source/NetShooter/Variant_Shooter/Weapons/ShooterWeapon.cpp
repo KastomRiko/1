@@ -303,7 +303,7 @@ FTransform AShooterWeapon::CalculateProjectileSpawnTransform(const FVector& Targ
 {
     FTransform MuzzleTransform = GetActorTransform();
 
-    const bool bUseFirstPersonMesh = PawnOwner && PawnOwner->IsPlayerControlled();
+    const bool bUseFirstPersonMesh = PawnOwner && PawnOwner->IsLocallyControlled();
 
     if (bUseFirstPersonMesh && FirstPersonMesh && !MuzzleSocketName.IsNone() && FirstPersonMesh->DoesSocketExist(MuzzleSocketName))
     {
