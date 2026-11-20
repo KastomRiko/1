@@ -66,9 +66,10 @@ void AShooterPlayerController::InitializeScoreboard(TSubclassOf<UShooterUI> Widg
 		{
 			ShooterGameState->OnTeamScoreChanged.AddUniqueDynamic(this, &AShooterPlayerController::OnTeamScoreChanged);
 
-			for (const TPair<uint8, int32>& TeamScore : ShooterGameState->GetTeamScores())
+			const TArray<int32>& TeamScores = ShooterGameState->GetTeamScores();
+			for (int32 TeamIndex = 0; TeamIndex < TeamScores.Num(); ++TeamIndex)
 			{
-				ShooterUI->BP_UpdateScore(TeamScore.Key, TeamScore.Value);
+				ShooterUI->BP_UpdateScore(static_cast<uint8>(TeamIndex), TeamScores[TeamIndex]);
 			}
 		}
 	}
