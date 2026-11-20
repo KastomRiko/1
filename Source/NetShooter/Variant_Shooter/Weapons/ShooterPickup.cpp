@@ -65,12 +65,20 @@ void AShooterPickup::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	// clear the respawn timer
-	GetWorld()->GetTimerManager().ClearTimer(RespawnTimer);
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RespawnTimer);
+	}
 }
 
 void AShooterPickup::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	// Only the server may grant a weapon or change pickup state.
+	if (!HasAuthority() || !IsValid(OtherActor) || !WeaponClass || !GetWorld())
+	{
+		return;
+	}
+
 	// have we collided against a weapon holder?
 	if (IShooterWeaponHolder* WeaponHolder = Cast<IShooterWeaponHolder>(OtherActor))
 	{
@@ -92,6 +100,11 @@ void AShooterPickup::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void AShooterPickup::RespawnPickup()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	// unhide this pickup
 	SetActorHiddenInGame(false);
 
@@ -101,6 +114,11 @@ void AShooterPickup::RespawnPickup()
 
 void AShooterPickup::FinishRespawn()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	// enable collision
 	SetActorEnableCollision(true);
 
