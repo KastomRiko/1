@@ -94,14 +94,37 @@ void AShooterNPCSpawner::SpawnNPC()
 
 	AShooterNPC* SpawnedNPC = GetWorld()->SpawnActor<AShooterNPC>(NPCClass, SpawnCapsule->GetComponentTransform(), SpawnParams);
 
-	if (SpawnedNPC)
+	if (IsValid(SpawnedNPC))
 	{
+		// A successful spawn starts a fresh failure sequence.
+		ConsecutiveSpawnFailures = 0;
+
 		// Subscribe to the death delegate.
-		SpawnedNPC->OnPawnDeath.AddDynamic(this, &AShooterNPCSpawner::OnNPCDied);
+		SpawnedNPC->OnPawnDeath.AddUniqueDynamic(this, &AShooterNPCSpawner::OnNPCDied);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s: failed to spawn NPC class '%s'."), *GetName(), *GetNameSafe(NPCClass.Get()));
+		// Keep SpawnCount unchanged: this NPC has not yet been created.
+		// Retry a few times in case the spawn failure is transient. A non-zero
+		// minimum delay prevents recursive immediate retries when RespawnDelay is 0.
+		++ConsecutiveSpawnFailures;
+
+		if (ConsecutiveSpawnFailures <= 3 && GetWorld())
+		{
+			const float RetryDelay = FMath::Max(RespawnDelay, 1.0f);
+			UE_LOG(LogTemp, Warning,
+				TEXT("%s: failed to spawn NPC class '%s' (attempt %d). Retrying in %.1f seconds."),
+				*GetName(), *GetNameSafe(NPCClass.Get()), ConsecutiveSpawnFailures, RetryDelay);
+
+			GetWorld()->GetTimerManager().SetTimer(
+				SpawnTimer, this, &AShooterNPCSpawner::SpawnNPC, RetryDelay, false);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error,
+				TEXT("%s: failed to spawn NPC class '%s' after %d retries. Spawner stopped."),
+				*GetName(), *GetNameSafe(NPCClass.Get()), ConsecutiveSpawnFailures);
+		}
 	}
 }
 
