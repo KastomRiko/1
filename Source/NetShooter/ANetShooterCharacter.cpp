@@ -1,4 +1,3 @@
-﻿
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "ANetShooterCharacter.h"
@@ -42,14 +41,10 @@ void ANetShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
     if (PC && DefaultMappingContext)
     {
-        ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
-
-        if (LocalPlayer)
+        if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
         {
-            UEnhancedInputLocalPlayerSubsystem* Subsystem =
-                ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-
-            if (Subsystem)
+            if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+                ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
             {
                 Subsystem->AddMappingContext(DefaultMappingContext, 0);
             }
@@ -60,7 +55,8 @@ void ANetShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
     {
         if (MoveAction)
         {
-            EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, static_cast<void (ANetShooterCharacter::*)(const FVector2D&)>(&ANetShooterCharacter::DoMove));
+            EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this,
+                static_cast<void (ANetShooterCharacter::*)(const FVector2D&)>(&ANetShooterCharacter::DoMove));
         }
 
         if (LookAction)
@@ -88,20 +84,14 @@ void ANetShooterCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 FVector ANetShooterCharacter::GetWeaponCameraLocation() const
 {
-    return FirstPersonCamera
-        ? FirstPersonCamera->GetComponentLocation()
-        : GetActorLocation();
+    return FirstPersonCamera ? FirstPersonCamera->GetComponentLocation() : GetActorLocation();
 }
 
 void ANetShooterCharacter::SetMovementEnabled(bool bEnabled)
 {
-    UCharacterMovementComponent* Movement = GetCharacterMovement();
-
-    if (Movement)
+    if (UCharacterMovementComponent* Movement = GetCharacterMovement())
     {
-        Movement->SetMovementMode(
-            bEnabled ? MOVE_Walking : MOVE_None
-        );
+        Movement->SetMovementMode(bEnabled ? MOVE_Walking : MOVE_None);
     }
 }
 
@@ -128,15 +118,8 @@ void ANetShooterCharacter::DoMove(const FVector2D& Value)
         const FRotator Rot = Controller->GetControlRotation();
         const FRotator YawRot(0.0f, Rot.Yaw, 0.0f);
 
-        AddMovementInput(
-            FRotationMatrix(YawRot).GetUnitAxis(EAxis::X),
-            Value.Y
-        );
-
-        AddMovementInput(
-            FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y),
-            Value.X
-        );
+        AddMovementInput(FRotationMatrix(YawRot).GetUnitAxis(EAxis::X), Value.Y);
+        AddMovementInput(FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y), Value.X);
     }
 }
 
@@ -179,3 +162,4 @@ void ANetShooterCharacter::EquipWeapon(ANetShooterWeapon* Weapon)
     {
         Weapon->Equip(this);
     }
+}
