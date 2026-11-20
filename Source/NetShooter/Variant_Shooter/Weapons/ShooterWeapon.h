@@ -1,4 +1,4 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -8,106 +8,79 @@
 #include "Animation/AnimInstance.h"
 #include "ShooterWeapon.generated.h"
 
-class IShooterWeaponHolder;
 class AShooterProjectile;
 class USkeletalMeshComponent;
 class UAnimMontage;
 class UAnimInstance;
+class APawn;
 
-/**
- * Base class for a simple first person shooter weapon.
- * SERVER AUTHORITATIVE — firing, ammo, and projectiles handled on server.
- * Visual effects (animations, recoil) replicate to clients via network state.
- */
 UCLASS(Abstract)
 class NETSHOOTER_API AShooterWeapon : public AActor
 {
     GENERATED_BODY()
 
 public:
-    /** First person perspective mesh */
-    UPROPERTY(VisibleAnywhere,BlueprintReadonly,Category="Components",meta=(AllowPrivateAccess="true"))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
     TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
 
-    /** Third person perspective mesh */
-    UPROPERTY(VisibleAnywhere,BlueprintReadonly,Category="Components",meta=(AllowPrivateAccess="true"))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
     TObjectPtr<USkeletalMeshComponent> ThirdPersonMesh;
 
 protected:
-    /** Cast pointer to the weapon owner */
-    IShooterWeaponHolder* WeaponOwner;
+    IShooterWeaponHolder* WeaponOwner = nullptr;
 
-    /** Type of projectiles this weapon will shoot */
-    UPROPERTY(EditAnywhere,Category="Ammo")
+    UPROPERTY(EditAnywhere, Category="Ammo")
     TSubclassOf<AShooterProjectile> ProjectileClass;
 
-    /** Number of bullets in a magazine */
-    UPROPERTY(EditAnywhere,Category="Ammo",meta=(ClampMin=0,ClampMax=100))
+    UPROPERTY(EditAnywhere, Category="Ammo", meta=(ClampMin=0, ClampMax=100))
     int32 MagazineSize = 10;
 
-    /** Number of bullets in the current magazine (replicated) */
-    UPROPERTY(ReplicatedUsing=OnRep_CurrentBullets,BlueprintReadWrite,Category="Ammo")
+    UPROPERTY(ReplicatedUsing=OnRep_CurrentBullets, BlueprintReadWrite, Category="Ammo")
     int32 CurrentBullets = 0;
 
-    /** Animation montage to play when firing this weapon */
-    UPROPERTY(EditAnywhere,Category="Animation")
+    UPROPERTY(EditAnywhere, Category="Animation")
     TObjectPtr<UAnimMontage> FiringMontage;
 
-    /** AnimInstance class for first person character mesh */
-    UPROPERTY(EditAnywhere,Category="Animation")
+    UPROPERTY(EditAnywhere, Category="Animation")
     TSubclassOf<UAnimInstance> FirstPersonAnimInstanceClass;
 
-    /** AnimInstance class for third person character mesh */
-    UPROPERTY(EditAnywhere,Category="Animation")
+    UPROPERTY(EditAnywhere, Category="Animation")
     TSubclassOf<UAnimInstance> ThirdPersonAnimInstanceClass;
 
-    /** Cone half-angle for variance while aiming */
-    UPROPERTY(EditAnywhere,Category="Aim",meta=(ClampMin=0,ClampMax=90,Units="Degrees"))
+    UPROPERTY(EditAnywhere, Category="Aim", meta=(ClampMin=0, ClampMax=90, Units="Degrees"))
     float AimVariance = 0.0f;
 
-    /** Amount of firing recoil to apply to the owner */
-    UPROPERTY(EditAnywhere,Category="Aim",meta=(ClampMin=0,ClampMax=100))
+    UPROPERTY(EditAnywhere, Category="Aim", meta=(ClampMin=0, ClampMax=100))
     float FiringRecoil = 0.0f;
 
-    /** Name of the first person muzzle socket where projectiles will spawn */
-    UPROPERTY(EditAnywhere,Category="Aim")
+    UPROPERTY(EditAnywhere, Category="Aim")
     FName MuzzleSocketName;
 
-    /** Distance ahead of the muzzle that bullets will spawn at */
-    UPROPERTY(EditAnywhere,Category="Aim",meta=(ClampMin=0,ClampMax=1000,Units="cm"))
+    UPROPERTY(EditAnywhere, Category="Aim", meta=(ClampMin=0, ClampMax=1000, Units="cm"))
     float MuzzleOffset = 10.0f;
 
-    /** If true, this weapon will automatically fire at the refire rate */
-    UPROPERTY(EditAnywhere,Category="Refire")
+    UPROPERTY(EditAnywhere, Category="Refire")
     bool bFullAuto = false;
 
-    /** Time between shots for this weapon */
-    UPROPERTY(EditAnywhere,Category="Refire",meta=(ClampMin=0,ClampMax=5,Units="s"))
+    UPROPERTY(EditAnywhere, Category="Refire", meta=(ClampMin=0, ClampMax=5, Units="s"))
     float RefireRate = 0.5f;
 
-    /** Game time of last shot fired, used to enforce refire rate */
-    float TimeOfLastShot = 0.0f;
+    float TimeOfLastShot = -1.0f;
 
-    /** If true, the weapon is currently firing (replicated) */
     UPROPERTY(Replicated)
     bool bIsFiring = false;
 
-    /** Timer to handle full auto refiring */
     FTimerHandle RefireTimer;
 
-    /** Cast pawn pointer to the owner for AI perception system interactions */
     TObjectPtr<APawn> PawnOwner;
 
-    /** Loudness of the shot for AI perception system interactions */
-    UPROPERTY(EditAnywhere,Category="Perception",meta=(ClampMin=0,ClampMax=100))
+    UPROPERTY(EditAnywhere, Category="Perception", meta=(ClampMin=0, ClampMax=100))
     float ShotLoudness = 1.0f;
 
-    /** Max range of shot AI perception noise */
-    UPROPERTY(EditAnywhere,Category="Perception",meta=(ClampMin=0,ClampMax=100000,Units="cm"))
+    UPROPERTY(EditAnywhere, Category="Perception", meta=(ClampMin=0, ClampMax=100000, Units="cm"))
     float ShotNoiseRange = 300.0f;
 
-    /** Tag to apply to noise generated by shooting this weapon */
-    UPROPERTY(EditAnywhere,Category="Perception")
+    UPROPERTY(EditAnywhere, Category="Perception")
     FName NoiseOwnerTag = FName("Shot");
 
 public:
@@ -117,59 +90,47 @@ protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
-    /** Called when the weapon owner is destroyed */
     UFUNCTION()
     void OnOwnerDestroyed(AActor* DestroyedActor);
 
-    /** Replication callback */
     UFUNCTION()
     void OnRep_CurrentBullets();
 
 public:
-    /** Activate this weapon and get it ready to fire */
     void ActivateWeapon(const FName& OwnerTag);
-
-    /** Deactivate this weapon */
     void DeactivateWeapon();
 
-    /** Stop firing (stops the refire timer and resets state) */
+    /** Client entry point; the server validates and performs the shot. */
+    void StartFiring();
     void StopFiring();
 
-    /** Start firing (client calls RPC to server) */
-    UFUNCTION(Server,Reliable)
+    UFUNCTION(Server, Reliable)
     void ServerStartFiring();
 
-    /** Stop firing (client calls RPC to server) */
-    UFUNCTION(Server,Reliable)
+    UFUNCTION(Server, Reliable)
     void ServerStopFiring();
 
-    /** Client-side visual fire notification (multicast) */
-    UFUNCTION(NetMulticast,Unreliable)
+    UFUNCTION(NetMulticast, Unreliable)
     void MulticastFireVisuals();
 
 protected:
-    /** Fire the weapon (server only) */
     virtual void Fire();
-
-    /** Called when the refire rate time has passed */
     void FireCooldownExpired();
-
-    /** Fire a projectile towards the target location */
     virtual void FireProjectile(const FVector& TargetLocation);
-
-    /** Calculate projectile spawn transform */
     FTransform CalculateProjectileSpawnTransform(const FVector& TargetLocation) const;
 
 public:
-    UFUNCTION(BlueprintPure,Category="Weapon")
+    UFUNCTION(BlueprintPure, Category="Weapon")
     USkeletalMeshComponent* GetFirstPersonMesh() const { return FirstPersonMesh; }
-    UFUNCTION(BlueprintPure,Category="Weapon")
+
+    UFUNCTION(BlueprintPure, Category="Weapon")
     USkeletalMeshComponent* GetThirdPersonMesh() const { return ThirdPersonMesh; }
+
     const TSubclassOf<UAnimInstance>& GetFirstPersonAnimInstanceClass() const;
     const TSubclassOf<UAnimInstance>& GetThirdPersonAnimInstanceClass() const;
+
     int32 GetMagazineSize() const { return MagazineSize; }
     int32 GetBulletCount() const { return CurrentBullets; }
 
-public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
