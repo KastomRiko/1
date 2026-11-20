@@ -24,12 +24,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Shooter")
 	TSubclassOf<UShooterUI> ShooterUIClass;
 
-	/** Pointer to the UI widget */
-	TObjectPtr<UShooterUI> ShooterUI;
-
-	/** Map of scores by team ID */
-	TMap<uint8, int32> TeamScores;
-
 protected:
 
 	/** Determines how many local players should be spawned on game start */
@@ -54,6 +48,9 @@ protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 public:
+
+	/** Constructor */
+	AShooterGameMode();
 
 	/** Increases the score for the given team */
 	void IncrementTeamScore(uint8 TeamByte);
