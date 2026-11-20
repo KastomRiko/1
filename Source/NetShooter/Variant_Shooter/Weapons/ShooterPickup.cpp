@@ -105,10 +105,14 @@ void AShooterPickup::RespawnPickup()
 		return;
 	}
 
-	// unhide this pickup
+	// Unhide on the server; the actor hidden state is replicated.
 	SetActorHiddenInGame(false);
+	MulticastRespawnPickup();
+}
 
-	// call the BP handler
+void AShooterPickup::MulticastRespawnPickup_Implementation()
+{
+	// Run the Blueprint respawn animation on every connected client.
 	BP_OnRespawn();
 }
 
