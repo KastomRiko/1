@@ -74,21 +74,27 @@ void AShooterNPCSpawner::SpawnNPC()
 		return;
 	}
 
-	// ensure the NPC class is valid
-	if (IsValid(NPCClass) && SpawnCapsule)
+	// Validate the spawn configuration before attempting to create an NPC.
+	if (!IsValid(NPCClass) || !IsValid(SpawnCapsule))
 	{
-		// spawn the NPC at the reference capsule's transform
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		UE_LOG(LogTemp, Error, TEXT("%s: cannot spawn NPC because NPCClass or SpawnCapsule is invalid."), *GetName());
+		return;
+	}
 
-		AShooterNPC* SpawnedNPC = GetWorld()->SpawnActor<AShooterNPC>(NPCClass, SpawnCapsule->GetComponentTransform(), SpawnParams);
+	// Spawn the NPC at the reference capsule's transform.
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		// was the NPC successfully created?
-		if (SpawnedNPC)
-		{
-			// subscribe to the death delegate
-			SpawnedNPC->OnPawnDeath.AddDynamic(this, &AShooterNPCSpawner::OnNPCDied);
-		}
+	AShooterNPC* SpawnedNPC = GetWorld()->SpawnActor<AShooterNPC>(NPCClass, SpawnCapsule->GetComponentTransform(), SpawnParams);
+
+	if (SpawnedNPC)
+	{
+		// Subscribe to the death delegate.
+		SpawnedNPC->OnPawnDeath.AddDynamic(this, &AShooterNPCSpawner::OnNPCDied);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s: failed to spawn NPC class '%s'."), *GetName(), *GetNameSafe(NPCClass.Get()));
 	}
 }
 
