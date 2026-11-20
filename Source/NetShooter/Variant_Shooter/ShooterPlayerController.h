@@ -65,6 +65,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UShooterUI> ShooterUI;
 
+	/** Pawn whose destruction is currently allowed to trigger a respawn. */
+	UPROPERTY(Transient)
+	TObjectPtr<APawn> PawnWithRespawnBinding = nullptr;
+
 	/** Team ID for this player */
 	uint8 TeamByte = 0;
 
