@@ -31,7 +31,7 @@ public:
 
 	void IncrementTeamScore(uint8 TeamByte);
 
-	const TMap<uint8, int32>& GetTeamScores() const { return TeamScores; }
+	const TArray<int32>& GetTeamScores() const { return TeamScores; }
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
