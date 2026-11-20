@@ -37,13 +37,7 @@ void AShooterWeapon::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (AActor* WeaponActorOwner = GetOwner())
-    {
-        WeaponActorOwner->OnDestroyed.AddUniqueDynamic(this, &AShooterWeapon::OnOwnerDestroyed);
-    }
-
-    WeaponOwner = Cast<IShooterWeaponHolder>(GetOwner());
-    PawnOwner = Cast<APawn>(GetOwner());
+    InitializeWeaponOwner();
 
     if (HasAuthority())
     {
@@ -52,6 +46,24 @@ void AShooterWeapon::BeginPlay()
     }
 
     SetActorHiddenInGame(true);
+}
+
+void AShooterWeapon::OnRep_Owner()
+{
+    Super::OnRep_Owner();
+    InitializeWeaponOwner();
+}
+
+void AShooterWeapon::InitializeWeaponOwner()
+{
+    AActor* WeaponActorOwner = GetOwner();
+    WeaponOwner = Cast<IShooterWeaponHolder>(WeaponActorOwner);
+    PawnOwner = Cast<APawn>(WeaponActorOwner);
+
+    if (WeaponActorOwner)
+    {
+        WeaponActorOwner->OnDestroyed.AddUniqueDynamic(this, &AShooterWeapon::OnOwnerDestroyed);
+    }
 
     if (WeaponOwner)
     {
@@ -71,10 +83,7 @@ void AShooterWeapon::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void AShooterWeapon::OnOwnerDestroyed(AActor* DestroyedActor)
 {
-    if (IsValid(this))
-    {
-        Destroy();
-    }
+    Destroy();
 }
 
 void AShooterWeapon::OnRep_CurrentBullets()
@@ -97,7 +106,10 @@ void AShooterWeapon::ActivateWeapon(const FName& OwnerTag)
     if (WeaponOwner)
     {
         WeaponOwner->OnWeaponActivated(this);
+        WeaponOwner->UpdateWeaponHUD(CurrentBullets, MagazineSize);
     }
+
+    ForceNetUpdate();
 }
 
 void AShooterWeapon::DeactivateWeapon()
@@ -114,6 +126,8 @@ void AShooterWeapon::DeactivateWeapon()
     {
         WeaponOwner->OnWeaponDeactivated(this);
     }
+
+    ForceNetUpdate();
 }
 
 void AShooterWeapon::StartFiring()
@@ -128,7 +142,7 @@ void AShooterWeapon::StopFiring()
 
 void AShooterWeapon::ServerStartFiring_Implementation()
 {
-    if (!HasAuthority() || !IsValid(GetOwner()) || !WeaponOwner || CurrentBullets <= 0)
+    if (!HasAuthority() || !IsValid(GetOwner()) || !WeaponOwner || CurrentBullets <= 0 || IsHidden())
     {
         return;
     }
@@ -149,12 +163,11 @@ void AShooterWeapon::ServerStartFiring_Implementation()
     }
     else
     {
-        const float RemainingCooldown = SafeRefireRate - TimeSinceLastShot;
         GetWorld()->GetTimerManager().SetTimer(
             RefireTimer,
             this,
             &AShooterWeapon::FireCooldownExpired,
-            RemainingCooldown,
+            SafeRefireRate - TimeSinceLastShot,
             false);
     }
 }
@@ -204,6 +217,7 @@ void AShooterWeapon::Fire()
 
     FireProjectile(TargetLocation);
     MulticastFireVisuals();
+    WeaponOwner->UpdateWeaponHUD(CurrentBullets, MagazineSize);
     ForceNetUpdate();
 
     if (PawnOwner)
@@ -279,9 +293,7 @@ void AShooterWeapon::FireProjectile(const FVector& TargetLocation)
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
     if (AShooterProjectile* Projectile = GetWorld()->SpawnActor<AShooterProjectile>(
-        ProjectileClass,
-        SpawnTransform,
-        SpawnParams))
+        ProjectileClass, SpawnTransform, SpawnParams))
     {
         Projectile->SetNoiseTag(NoiseOwnerTag);
     }
@@ -323,7 +335,6 @@ const TSubclassOf<UAnimInstance>& AShooterWeapon::GetThirdPersonAnimInstanceClas
 void AShooterWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
     DOREPLIFETIME(AShooterWeapon, CurrentBullets);
     DOREPLIFETIME(AShooterWeapon, bIsFiring);
 }
