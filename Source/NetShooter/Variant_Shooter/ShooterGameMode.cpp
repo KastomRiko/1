@@ -17,20 +17,12 @@ void AShooterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// create each additional local player.
-	// Player 0 will be created automatically as part of regular game init
+	// Player 0 is created automatically; create any additional local split-screen players.
+	// PostLogin assigns every player to the currently less populated team.
 	for (int32 i = 2; i <= NumberOfLocalPlayers; ++i)
 	{
-		if (AShooterPlayerController* NewPlayer = Cast<AShooterPlayerController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true)))
-		{
-			NewPlayer->SetTeam(1 - (i % 2));
-		}
+		UGameplayStatics::CreatePlayer(GetWorld(), -1, true);
 	}
-
-
-	// Local split-screen players occupy teams 0, 1, 0, 1...;
-	// continue the same sequence for later network logins.
-	NextTeamByte = static_cast<uint8>(NumberOfLocalPlayers % 2);
 }
 
 void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
@@ -39,8 +31,38 @@ void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
 
 	if (AShooterPlayerController* ShooterPlayer = Cast<AShooterPlayerController>(NewPlayer))
 	{
-		ShooterPlayer->SetTeam(NextTeamByte);
-		NextTeamByte = static_cast<uint8>(1 - NextTeamByte);
+		int32 TeamCounts[2] = { 0, 0 };
+
+		if (GetWorld())
+		{
+			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+			{
+				APlayerController* ExistingPlayer = It->Get();
+				if (!IsValid(ExistingPlayer) || ExistingPlayer == NewPlayer)
+				{
+					continue;
+				}
+
+				if (const AShooterPlayerController* ExistingShooterPlayer = Cast<AShooterPlayerController>(ExistingPlayer))
+				{
+					const uint8 ExistingTeam = ExistingShooterPlayer->GetTeamByte();
+					++TeamCounts[ExistingTeam == 0 ? 0 : 1];
+				}
+			}
+		}
+
+		uint8 AssignedTeam = NextTeamByte;
+		if (TeamCounts[0] < TeamCounts[1])
+		{
+			AssignedTeam = 0;
+		}
+		else if (TeamCounts[1] < TeamCounts[0])
+		{
+			AssignedTeam = 1;
+		}
+
+		ShooterPlayer->SetTeam(AssignedTeam);
+		NextTeamByte = static_cast<uint8>(1 - AssignedTeam);
 
 		// The scoreboard widget must be created by each owning local player.
 		if (ShooterPlayer->IsLocalController())
