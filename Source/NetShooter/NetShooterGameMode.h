@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "Variant_Shooter/ShooterGameMode.h"
 #include "NetShooterGameMode.generated.h"
 
 UCLASS()
-class NETSHOOTER_API ANetShooterGameMode : public AGameModeBase
+class NETSHOOTER_API ANetShooterGameMode : public AShooterGameMode
 {
     GENERATED_BODY()
 
