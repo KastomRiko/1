@@ -55,7 +55,7 @@ float AShooterNPC::TakeDamage(float Damage, FDamageEvent const& DamageEvent, ACo
 
     if (CurrentHP <= 0.0f)
     {
-        Die();
+        Die(EventInstigator);
     }
 
     return AppliedDamage;
@@ -167,7 +167,7 @@ void AShooterNPC::OnSemiWeaponRefire()
     }
 }
 
-void AShooterNPC::Die()
+void AShooterNPC::Die(AController* Killer)
 {
     if (!HasAuthority() || bIsDead)
     {
@@ -190,7 +190,7 @@ void AShooterNPC::Die()
     {
         if (AShooterGameMode* GameMode = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
         {
-            GameMode->IncrementTeamScore(TeamByte);
+            GameMode->IncrementTeamScoreForController(Killer);
         }
 
         GetWorld()->GetTimerManager().SetTimer(
