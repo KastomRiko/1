@@ -28,6 +28,22 @@ void AShooterGameMode::BeginPlay()
 			NewPlayer->SetTeam(1 - (i % 2));
 		}
 	}
+
+
+	// Local split-screen players occupy teams 0, 1, 0, 1...;
+	// continue the same sequence for later network logins.
+	NextTeamByte = static_cast<uint8>(NumberOfLocalPlayers % 2);
+}
+
+void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	if (AShooterPlayerController* ShooterPlayer = Cast<AShooterPlayerController>(NewPlayer))
+	{
+		ShooterPlayer->SetTeam(NextTeamByte);
+		NextTeamByte = static_cast<uint8>(1 - NextTeamByte);
+	}
 }
 
 AActor* AShooterGameMode::ChoosePlayerStart_Implementation(AController* Player)
