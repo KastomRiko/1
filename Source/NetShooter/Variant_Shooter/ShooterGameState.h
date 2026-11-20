@@ -19,7 +19,7 @@ class NETSHOOTER_API AShooterGameState : public AGameStateBase
 protected:
 
 	UPROPERTY(ReplicatedUsing=OnRep_TeamScores, BlueprintReadOnly, Category="Shooter")
-	TMap<uint8, int32> TeamScores;
+	TArray<int32> TeamScores;
 
 	UFUNCTION()
 	void OnRep_TeamScores();
