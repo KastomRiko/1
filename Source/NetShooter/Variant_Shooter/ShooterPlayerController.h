@@ -73,8 +73,20 @@ protected:
 	/** Initialize input bindings */
 	virtual void SetupInputComponent() override;
 
-	/** Pawn initialization */
+	/** Pawn initialization on the authority */
 	virtual void OnPossess(APawn* InPawn) override;
+
+	/** Pawn replication on the owning client */
+	virtual void OnRep_Pawn() override;
+
+	/** Pawn unpossession */
+	virtual void OnUnPossess() override;
+
+	/** Bind HUD delegates for the current pawn */
+	void BindToShooterCharacter(APawn* InPawn);
+	void UnbindFromShooterCharacter();
+
+	TWeakObjectPtr<AShooterCharacter> BoundShooterCharacter;
 
 	/** Called if the possessed pawn is destroyed */
 	UFUNCTION()
