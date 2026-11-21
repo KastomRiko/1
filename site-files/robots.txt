@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /_wp-trash*
+Disallow: /clean.php
+Disallow: /*?nc=
+
+Sitemap: https://ipkorotkov.online/sitemap.xml
