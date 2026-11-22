@@ -208,11 +208,12 @@ footer.site a{color:var(--mut);display:block;padding:3px 0;font-size:13px}footer
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="srch" role="dialog" aria-modal="true" aria-label="Поиск по сайту"><div class="sc" id="sSc"></div><div class="box"><input id="sInp" type="search" placeholder="Услуга, город или статья…" autocomplete="off"><div class="res" id="sRes"></div></div></div>
 
+<script src="/data.js"></script>
 <script>
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-var BASE="https://ipkorotkov.online",TEL="+79641519362",DISP="+7 (964) 151-93-62",TODAY="2026-11-22";
+var BASE="https://ipkorotkov.online",TEL=SITE.contacts.tel,DISP=SITE.contacts.disp,EMAIL=SITE.contacts.email,TODAY=new Date().toISOString().slice(0,10);
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function rub(n){return Math.round(n).toLocaleString("ru-RU")}
 var tT=null;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(function(){t.classList.remove("show")},2400)}
@@ -223,126 +224,9 @@ function icon(n){var p={code:'<path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/>',db:'<ellip
 return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'}
 
 /* ================= ДАННЫЕ ================= */
-var SERVICES=[
-{s:"parser-2gis",n:"Парсер 2ГИС и базы организаций",cat:"Данные",ic:"db",acc:"var(--lime)",from:500,unit:"за выгрузку",term:"1–3 дня",
-short:"Собираю карточки компаний по городам и категориям: телефоны, адреса, сайты, рейтинги. Выгрузка в Excel, CSV, Google Таблицы или CRM.",
-bullets:["Название, категория, адрес и координаты","Прямые телефоны и сайт организации","Рейтинг 2ГИС и число отзывов","Дедупликация филиалов и нормализация номеров","Импорт в Bitrix24 / amoCRM или передача по API"],
-tiers:[{n:"Пробная выгрузка до 100 организаций",p:500,d:"Проверка структуры и качества"},{n:"До 1 000 организаций",p:3000,d:"Город или узкая категория"},{n:"До 10 000 организаций",p:9000,d:"Категория в крупном городе"},{n:"Город под ключ",p:15000,d:"Все категории с очисткой"}],
-faq:[["Это законно?","Собираю только открытые публичные данные организаций, которые они сами разместили в справочнике. Персональные данные частных лиц не собираю, соблюдаю лимиты запросов."],["Данные устаревают?","Подключаю ежемесячное обновление: новые точки, закрытые и сменившие телефон. Стоимость сопровождения — от 5 000 ₽/мес."]]},
-{s:"parser-cen",n:"Мониторинг цен конкурентов",cat:"Данные",ic:"chart",acc:"var(--cyan)",from:900,unit:"запуск + от 1 500 ₽/мес",term:"1–2 дня",
-short:"Парсер снимает цены с сайтов конкурентов и маркетплейсов, ведёт историю 90 дней и присылает алерт о демпинге в Telegram.",
-bullets:["Сопоставление товаров по артикулу и бренду","История цен и график по каждому SKU","Таблица undercut: кто дешевле вас","Алерты в Telegram при пробое порога","Правка парсера при смене вёрстки конкурента"],
-tiers:[{n:"Пробный мониторинг 10 SKU",p:900,d:"3 магазина, проверка сопоставления"},{n:"До 50 SKU",p:3000,d:"Ключевые позиции магазина"},{n:"До 200 SKU",p:7000,d:"Основной ассортимент"},{n:"До 1 000 SKU",p:15000,d:"Каталог целиком"}],
-faq:[["Конкурент поменял сайт — всё сломается?","В сопровождение входит правка парсера и контроль, что сбор не остановился. Об обрыве я узнаю раньше вас."],["Как часто снимаются цены?","От раза в сутки до каждых 15 минут. Частота влияет только на ежемесячную часть."]]},
-{s:"parser-marketplace",n:"Парсер маркетплейсов",cat:"Данные",ic:"cart",acc:"var(--violet)",from:1500,unit:"за выгрузку",term:"1–3 дня",
-short:"Сбор карточек Ozon, Wildberries и Яндекс Маркета: цены, остатки, отзывы, позиции в выдаче — для селлеров и аналитиков.",
-bullets:["Цены, скидки и остатки по SKU","Отзывы, рейтинг и вопросы покупателей","Позиции карточек по ключевым запросам","Выгрузка в Excel или Google Таблицы","Регулярное обновление по расписанию"],
-tiers:[{n:"Разовая выгрузка до 300 карточек",p:1500,d:"Проверка гипотезы или ниши"},{n:"До 3 000 карточек",p:6000,d:"Категория целиком"},{n:"Мониторинг категории",p:12000,d:"Ежедневное обновление + отчёт"}],
-faq:[["Маркетплейс блокирует сбор?","Работаю с ограничением частоты и корректными заголовками, при необходимости через прокси. Персональные данные покупателей не собираю."],["Можно следить за конкурентами-селлерами?","Да, по списку артикулов или по категории с фильтром по бренду и цене."]]},
-{s:"sites",n:"Сайты и лендинги под ключ",cat:"Веб",ic:"globe",acc:"var(--blue)",from:12000,unit:"за проект",term:"5–14 дней",
-short:"Посадочные страницы и сайты-каталоги: структура под запросы, адаптив, формы заявок и подключение аналитики.",
-bullets:["Структура под коммерческие запросы","Адаптивная вёрстка и быстрая загрузка","Формы заявок с уведомлением в Telegram","Базовая SEO-разметка и метатеги","Подключение домена, SSL и аналитики"],
-tiers:[{n:"Одностраничный лендинг",p:12000,d:"Оффер, блоки, форма, аналитика"},{n:"Сайт-каталог до 10 страниц",p:28000,d:"Каталог, фильтры, карточки"},{n:"Сайт услуг с городскими страницами",p:45000,d:"Шаблон + генерация гео-страниц"}],
-faq:[["На чём делаете?","WordPress для сайтов с контентом и статика там, где важна скорость. Оба варианта одинаково хорошо индексируются."],["Кто пишет тексты?","Структуру и черновики под запросы делаю я, факты о бизнесе и цены уточняем вместе."]]},
-{s:"wordpress",n:"Доработки и лечение WordPress",cat:"Веб",ic:"wrench",acc:"var(--amber)",from:1500,unit:"за задачу",term:"в день обращения",
-short:"Правки вёрстки, ускорение, починка форм и плагинов, перенос на другой хостинг, резервные копии и защита от взлома.",
-bullets:["Правки вёрстки и адаптива","Ускорение: кэш, изображения, запросы","Починка форм заявок и писем","Перенос на новый хостинг без простоя","Ежедневные бэкапы и проверка восстановления"],
-tiers:[{n:"Разовая правка",p:1500,d:"Одна задача, оплата по факту"},{n:"Пакет 5 часов",p:6500,d:"Мелкие задачи в течение месяца"},{n:"Перенос и настройка бэкапов",p:8000,d:"Без простоя, с проверкой восстановления"}],
-faq:[["Возьмётесь за чужой сайт?","Да, сначала смотрю доступы и состояние, называю объём и цену до начала работ."],["Если что-то сломается после правки?","Правки делаю на копии или с бэкапом, откат занимает минуты."]]},
-{s:"integrations",n:"Интеграции: 1С, CRM, телефония",cat:"Автоматизация",ic:"link",acc:"var(--mag)",from:4000,unit:"за связку",term:"2–5 дней",
-short:"Связываю сайт, 1С, CRM и телефонию: заказы, остатки, цены и звонки ходят сами, без ручного переноса.",
-bullets:["Обмен заказами между сайтом и 1С","Остатки и цены из учётной системы на сайт","Заявки с сайта в Bitrix24 или amoCRM","Подключение IP-телефонии и запись звонков","Логи обмена и уведомления об ошибках"],
-tiers:[{n:"Одна связка (сайт → CRM)",p:4000,d:"Заявки с форм в воронку"},{n:"Обмен с 1С",p:14000,d:"Заказы, остатки, цены, статусы"},{n:"Комплекс: сайт + 1С + CRM + телефония",p:32000,d:"Под ключ с логами и поддержкой"}],
-faq:[["Какая 1С подходит?","Работаю с типовыми конфигурациями через обмен CommerceML или HTTP-сервисы; нестандартные доработки согласуем."],["Что если обмен упадёт?","Пишу логи и алерты: при ошибке приходит уведомление, обмен возобновляется с последнего успешного пакета."]]},
-{s:"bots",n:"Telegram-боты и автоматизация рутины",cat:"Автоматизация",ic:"bot",acc:"var(--green)",from:3500,unit:"за бота",term:"2–7 дней",
-short:"Боты приёма заявок, уведомлений и рассылок, скрипты для отчётов и обработки таблиц, парсинг документов.",
-bullets:["Пошаговый приём заявок с валидацией","Распределение по менеджерам и статусы","Рассылки и напоминания по расписанию","Сборка отчётов из Excel и выгрузок","Интеграция с CRM и Google Таблицами"],
-tiers:[{n:"Бот-приём заявок",p:3500,d:"Бриф, уведомление, ответ клиенту"},{n:"Бот с очередью и статусами",p:9000,d:"Роли, мастера, история"},{n:"Автоматизация отчётов",p:7000,d:"Скрипт + расписание + рассылка"}],
-faq:[["Где будет жить бот?","На вашем сервере или на моём с передачей исходников — выбираете при заказе."],["Можно доработать позже?","Да, код передаётся с инструкцией, доработки считаю по часам."]]},
-{s:"support",n:"Удаленная техподдержка",cat:"Поддержка",ic:"shield",acc:"var(--red)",from:500,unit:"за задачу",term:"в день обращения",
-short:"Разовая помощь удаленно: настройка ПК и сети, серверы и бэкапы, починка Lampa и медиаплееров, разбор «ничего не работает».",
-bullets:["Диагностика до оплаты работ","Настройка сети, роутеров и VPN","Серверы: обновление, бэкапы, доступы","Починка Lampa: порты, прокси, DNS","Письменный отчёт по сделанному"],
-tiers:[{n:"Разовая задача",p:500,d:"Диагностика и настройка"},{n:"Починка Lampa + личный портал",p:1000,d:"ТВ, приставка, ПК"},{n:"Абонемент для малого офиса",p:6000,d:"Месяц сопровождения, до 10 часов"}],
-faq:[["Вы выезжаете на дом?","Нет, работаю только удаленно через RustDesk или TeamViewer — быстрее и дешевле выезда."],["А если не почините?","Диагностика до оплаты: если задача нерешаема, говорю сразу и денег не беру."]]}
-];
-var CITIES=[
-{s:"moskva",n:"Москва",r:"ЦФО",tz:"МСК",ind:"Крупные каталоги, маркетплейсы и B2B-продажи — чаще всего нужны базы организаций и мониторинг цен."},
-{s:"spb",n:"Санкт-Петербург",r:"СЗФО",tz:"МСК",ind:"Много интернет-магазинов и салонов: востребованы каталоги, интеграции с 1С и сбор конкурентных цен."},
-{s:"kazan",n:"Казань",r:"ПФО",tz:"МСК",ind:"Сильный малый бизнес и сети услуг: базы 2ГИС и CRM-интеграции окупаются быстрее всего."},
-{s:"ekb",n:"Екатеринбург",r:"УФО",tz:"МСК+2",ind:"Промышленность и металлообработка: калькуляторы расчёта, прайсы металлобаз и B2B-заявки."},
-{s:"nsk",n:"Новосибирск",r:"СФО",tz:"МСК+2",ind:"Логистика и опт: обмен с 1С, автоматизация отчётов и мониторинг поставщиков."},
-{s:"nn",n:"Нижний Новгород",r:"ПФО",tz:"МСК",ind:"Производство и дорожные подрядчики: сметные калькуляторы и лендинги под заявки."},
-{s:"krasnodar",n:"Краснодар",r:"ЮФО",tz:"МСК",ind:"Агро и стройка: мониторинг цен по региону и сбор объявлений."},
-{s:"rnd",n:"Ростов-на-Дону",r:"ЮФО",tz:"МСК",ind:"Металлоконструкции и опт: квизы с параметрами заказа и прайс-мониторинг."},
-{s:"samara",n:"Самара",r:"ПФО",tz:"МСК+1",ind:"Логистика и сервисы: автоматизация отчётов и боты приёма заявок."},
-{s:"ufa",n:"Уфа",r:"ПФО",tz:"МСК+2",ind:"Металлообработка и цеха: раскрой, расчёт реза и себестоимости."},
-{s:"chelyabinsk",n:"Челябинск",r:"УФО",tz:"МСК+2",ind:"Металлотрейдинг: ежедневные прайсы металлобаз и справочники номенклатуры."},
-{s:"vvo",n:"Владивосток",r:"ДФО",tz:"МСК+7",ind:"Импорт и сервисы: боты, поддержка и мониторинг с учётом разницы в 7 часов."},
-{s:"kld",n:"Калининград",r:"СЗФО",tz:"МСК−1",ind:"Туризм и малый бизнес: сайты, ускорение и починка форм заявок."},
-{s:"yaroslavl",n:"Ярославль",r:"ЦФО",tz:"МСК",ind:"Сообщества и локальные услуги: форумы, сайты и миграции без потери архива."},
-{s:"voronezh",n:"Воронеж",r:"ЦФО",tz:"МСК",ind:"Сервисные центры и агро: боты заявок и очереди мастеров."},
-{s:"perm",n:"Пермь",r:"ПФО",tz:"МСК+2",ind:"Промышленность и франшизы: геоаналитика по конкурентам и подбор локаций."},
-{s:"tyumen",n:"Тюмень",r:"УФО",tz:"МСК+2",ind:"Стройка и снабжение: дашборды цен и контроль поставщиков."},
-{s:"krasnoyarsk",n:"Красноярск",r:"СФО",tz:"МСК+4",ind:"Опт и подряды: переносы сайтов, бэкапы и сбор баз подрядчиков."}
-];
-var CASES=[
-{c:"Москва",y:2026,k:"Мониторинг цен",t:"1 200 SKU и 9 конкурентов",d:"Делал для клиента из Москвы: часовое снятие цен и алерты о демпинге, реакция вместо недели — за час.",sv:"parser-cen"},
-{c:"Санкт-Петербург",y:2025,k:"Мониторинг цен",t:"460 позиций для сети стройматериалов",d:"Делал для клиента из Санкт-Петербурга: утренний отчёт минимумов до открытия магазина.",sv:"parser-cen"},
-{c:"Казань",y:2026,k:"Парсер 2ГИС",t:"3 200 карточек в amoCRM",d:"Делал для клиента из Казани: автопарки и таксопарки города с автосозданием сделок.",sv:"parser-2gis"},
-{c:"Екатеринбург",y:2025,k:"Калькулятор",t:"Расчёт металлообработки на сайте завода",d:"Делал для клиента из Екатеринбурга: 64 варианта расчёта резки, гибки и сварки со сметой в CRM.",sv:"sites"},
-{c:"Новосибирск",y:2025,k:"Интеграция",t:"Обмен заказами и остатками с 1С",d:"Делал для клиента из Новосибирска: обмен каждые 15 минут, ручной ввод исключён.",sv:"integrations"},
-{c:"Нижний Новгород",y:2024,k:"Плагин",t:"Смета асфальтирования за минуту",d:"Делал для клиента из Нижнего Новгорода: 38 типов покрытий вместо суток ожидания сметы.",sv:"wordpress"},
-{c:"Краснодар",y:2026,k:"Мониторинг цен",t:"5 400 позиций агропоставщика",d:"Делал для клиента из Краснодара: сравнение с прошлым днём и алерты в Telegram.",sv:"parser-cen"},
-{c:"Ростов-на-Дону",y:2025,k:"Лендинг",t:"Квиз для металлоконструкций",d:"Делал для клиента из Ростова-на-Дону: бриф с параметрами приходит в CRM до звонка.",sv:"sites"},
-{c:"Самара",y:2024,k:"Автоматизация",t:"26 отчётных форм без ручной сводки",d:"Делал для клиента из Самары: экономия около 6 часов логиста в неделю.",sv:"bots"},
-{c:"Уфа",y:2025,k:"Плагин",t:"Раскрой листа для лазерной резки",d:"Делал для клиента из Уфы: 44 профиля, длина реза и отходы считаются сразу.",sv:"wordpress"},
-{c:"Челябинск",y:2026,k:"Мониторинг цен",t:"7 800 позиций прайсов металлобаз",d:"Делал для клиента из Челябинска: единый справочник и лучшая цена дня.",sv:"parser-cen"},
-{c:"Владивосток",y:2026,k:"Бот",t:"Заявки сервисного центра в Telegram",d:"Делал для клиента из Владивостока: фото поломки, очередь мастеров, статусы без звонка.",sv:"bots"},
-{c:"Калининград",y:2024,k:"Правки",t:"18 страниц и ускорение сайта",d:"Делал для клиента из Калининградской области: вёрстка, кэш и восстановленные формы.",sv:"wordpress"},
-{c:"Пермь",y:2026,k:"Парсер 2ГИС",t:"3 200 организаций для франшизы",d:"Делал для клиента из Перми: плотность конкурентов по районам, три города отсеяны.",sv:"parser-2gis"}
-];
-var POSTS=[
-{s:"nizkochastotnye-zaprosy",t:"Как собрать низкочастотные запросы для ИТ-услуг",d:"2026-11-18",tag:"SEO",read:6,
-x:"Почему «услуги программиста» не взять, а «парсер 2гис цена» — можно, и как отличить живой запрос от мёртвого.",
-b:[["Что такое частотность","Частотность — сколько раз фразу вводят в поиск за месяц. Высокочастотные запросы (от 1000) заняты студиями и агрегаторами. Средние (100–1000) уже подъёмны. Низкие (10–100) — то, с чего стоит начинать одиночному специалисту."],
-["Рабочий диапазон","Цельтесь в 30–300 показов в месяц. Ниже 10 — страницы делать бессмысленно: трафика не будет. Выше 500 — придётся конкурировать с сайтами, у которых есть ссылки и бюджет."],
-["Как проверять","Откройте Wordstat, введите короткое ядро из двух слов и смотрите левую колонку — что люди дописывают. Правая колонка даёт смежные темы. Длинные фразы, которые вы придумали сами, почти всегда имеют нулевую частотность."],
-["Интент важнее частоты","«Парсер скачать» и «парсер онлайн» — люди ищут бесплатный софт, они не купят разработку. «Парсер 2гис цена», «заказать парсинг объявлений» — коммерческие. Слова-маркеры: цена, заказать, под ключ, удаленно, срочно, разово."],
-["Проверка выдачи","Вбейте фразу в поиск в режиме инкогнито. Если в топе форумы, Авито, Профи.ру, Kwork и статьи — конкуренции почти нет: поисковик не нашёл коммерческой страницы и отдаст место вашей."]]},
-{s:"parser-2gis-zakonno",t:"Что можно собирать из 2ГИС и что нельзя",d:"2026-11-14",tag:"Данные",read:5,
-x:"Граница между публичными данными организации и персональными данными, плюс технические ограничения сбора.",
-b:[["Публичные данные организации","Название, адрес, рабочий телефон, сайт, часы работы, рейтинг — это сведения, которые компания сама опубликовала для клиентов. Их сбор для B2B-аналитики и обзвона организаций — обычная практика."],
-["Чего касаемся","ФИО, личные мобильные и почты физических лиц, данные владельцев ИП в связке с личностью — не собираю. Это уже персональные данные, и их обработка требует отдельных оснований."],
-["Технические рамки","Ограничиваю частоту запросов, ставлю паузы, кэширую ответы и не создаю нагрузку на сервис. Парсер не должен обходить авторизацию и капчу."],
-["Что отдаю клиенту","Выгрузку с полями, которые вы выбрали, отчёт о покрытии по городам и доле заполненных контактов, а также список исключённых дублей."]]},
-{s:"monitoring-cen-demping",t:"Как ловить демпинг конкурента до потери продаж",d:"2026-11-08",tag:"Данные",read:7,
-x:"Порог алерта, сопоставление товаров и почему разовый скрипт ломается через месяц.",
-b:[["Проблема не в цене, а в задержке","Конкурент опускает цену на 3–5%, вы узнаёте об этом через неделю по падению выручки. Мониторинг сокращает задержку до часа."],
-["Сопоставление товаров","Сравнивать нужно одну и ту же позицию: артикул производителя и бренд, при их отсутствии — нормализованное название и ключевые характеристики. Спорные пары выносятся на ручную проверку."],
-["Порог алерта","Ставьте 3–5% и только на снижение ниже вашей цены. Иначе лента превратится в шум из колебаний на копейки."],
-["Сопровождение обязательно","Магазины меняют вёрстку. Разовый скрипт умирает за месяц-два. В абонентку входит правка селекторов и контроль, что сбор вообще идёт."]]},
-{s:"lampa-parser-ne-otvechaet",t:"Ошибка «Парсер не отвечает на запрос» в Lampa",d:"2026-11-02",tag:"Поддержка",read:5,
-x:"Пять причин ошибки на LG webOS, Samsung Tizen и Android TV и что реально помогает.",
-b:[["Мёртвые публичные порты","Самая частая причина: приложение стучится в порты, которые заблокированы или лежат. Смена парсера в настройках не помогает, потому что все они мертвы."],
-["Прокси TMDB","Без включённого прокси приложение не подтягивает данные о фильмах и показывает пустой экран."],
-["DNS и блокировки","Запросы могут не доходить до сервера из-за провайдера. Настройка DNS решает это без VPN на телевизоре."],
-["Личный парсер-портал","Когда публичные порты не держатся, стабильное решение — свой портал с автообновлением списка портов."],
-["Кривая сборка","После обновления из стороннего источника конфигурация слетает. Помогает чистая пересборка с рабочими параметрами."]]},
-{s:"geo-stranicy-uslug",t:"Зачем услуги под разные города, если работаешь удаленно",d:"2026-10-27",tag:"SEO",read:6,
-x:"Гео-страницы дают низкую конкуренцию и тёплый трафик даже без офиса в городе.",
-b:[["Спрос существует","Люди пишут «парсер москва», «доработка сайта воронеж», хотя исполнитель может быть где угодно. Город в запросе — это привычка, а не требование офиса."],
-["Конкуренция ниже","По связке услуга + город выдача слабее, чем по общей услуге: часто там агрегаторы и каталоги фирм, а не страница под конкретную задачу."],
-["Чем наполнять","Не копируйте один текст: добавьте часовой пояс и время созвона, местную отраслевую специфику, реальный кейс из города и срок с учётом разницы во времени."],
-["Технически","Отдельная папка со страницей на каждую связку, единый шаблон, уникальные title и H1, перелинковка на соседние города и общий раздел услуг, строки в sitemap.xml."]]},
-{s:"sitemap-dlya-statiki",t:"sitemap.xml для статических страниц на хостинге с WordPress",d:"2026-10-20",tag:"SEO",read:5,
-x:"Почему плагин не видит ваши папки и как собрать карту сайта вручную.",
-b:[["Плагины видят только WordPress","SEO-плагин строит карту из записей и страниц CMS. Папки со статическими файлами, загруженные через менеджер файлов, в неё не попадают."],
-["Решение","Держите собственный sitemap.xml в корне и включайте в него и страницы CMS, и статические папки. Плагины при этом можно отключить от генерации карты, чтобы не было двух источников."],
-["robots.txt","Добавьте строку Sitemap с полным адресом карты и закройте служебные пути WordPress."],
-["Индексация","После загрузки карты отправьте её в Search Console и Яндекс Вебмастер, а новые адреса дополнительно прогоните через «Проверку URL»."]]}
-];
-var REVIEWS=[["Марина Шведова","Специалист отличный, качественно и быстро выполняет все работы. Даже в форс-мажорных ситуациях оперативно приходит на помощь, спасибо!"],["Евгения Светлова","Обратился по рекомендации. Очень ответственный человек, делает всё качественно и, что самое главное, делает отчёты."]];
-
+var SITE=window.SITE_DATA;
+if(!SITE||SITE.v!==3)throw new Error("data.js v3 not loaded");
+var SERVICES=SITE.services,CITIES=SITE.cities,CASES=SITE.cases,POSTS=SITE.posts,REVIEWS=SITE.reviews||[];
 /* ================= РОУТЫ ================= */
 function svc(s){return SERVICES.filter(function(x){return x.s===s})[0]}
 function cty(s){return CITIES.filter(function(x){return x.s===s})[0]}
@@ -350,7 +234,7 @@ function post(s){return POSTS.filter(function(x){return x.s===s})[0]}
 function allRoutes(){
 var r=[{u:"/",t:"Страница",n:"Главная",p:"1.0"},{u:"/about/",t:"Страница",n:"Обо мне",p:"0.8"},{u:"/services/",t:"Раздел",n:"Все услуги",p:"0.9"},{u:"/blog/",t:"Раздел",n:"Блог",p:"0.8"},{u:"/contact/",t:"Страница",n:"Контакты",p:"0.8"},{u:"/sitemap/",t:"Служебная",n:"Карта сайта",p:"0.3"}];
 SERVICES.forEach(function(s){r.push({u:"/services/"+s.s+"/",t:"Услуга",n:s.n,p:"0.9"})});
-SERVICES.forEach(function(s){CITIES.forEach(function(c){r.push({u:"/services/"+s.s+"/"+c.s+"/",t:"Гео",n:s.n+" — "+c.n,p:"0.7",city:c.s,service:s.s})})});
+SERVICES.forEach(function(s){if(!s.noGeo)CITIES.forEach(function(c){r.push({u:"/services/"+s.s+"/"+c.s+"/",t:"Гео",n:s.n+" — "+c.n,p:"0.7",city:c.s,service:s.s})})});
 POSTS.forEach(function(p){r.push({u:"/blog/"+p.s+"/",t:"Статья",n:p.t,p:"0.6"})});
 return r}
 var ROUTES=allRoutes();
@@ -360,15 +244,16 @@ if(h&&h.charAt(0)==="/")return norm(h);
 var p=location.pathname.replace(/index\.html?$/i,"");
 return norm(p)}
 function norm(p){if(!p)return"/";if(p.charAt(0)!=="/")p="/"+p;if(p.length>1&&p.slice(-1)!=="/")p+="/";
-var known=ROUTES.some(function(r){return r.u===p});return known?p:"/"}
+return p}
 function go(u){location.hash=u}
 function urlOf(u){return BASE+u}
 
 /* ================= SEO ================= */
 function setMeta(o){
 document.title=o.title;
-var m=document.querySelector('meta[name="description"]');if(m)m.setAttribute("content",o.desc);
-var c=document.querySelector('link[rel="canonical"]');if(c)c.setAttribute("href",urlOf(o.u));
+var m=document.querySelector('meta[name="description"]');if(m)m.setAttribute("content",o.desc||"");
+var robots=document.querySelector('meta[name="robots"]');if(!robots){robots=document.createElement("meta");robots.name="robots";document.head.appendChild(robots)}robots.content=o.noindex?"noindex,follow":"index,follow";
+var c=document.querySelector('link[rel="canonical"]');if(c){if(o.canonical===false)c.remove();else c.setAttribute("href",urlOf(o.u))}
 ["og:title","og:description","og:url"].forEach(function(k){var e=document.querySelector('meta[property="'+k+'"]');if(e)e.setAttribute("content",k==="og:title"?o.title:k==="og:description"?o.desc:urlOf(o.u))});
 $$('script[data-ld]').forEach(function(s){s.remove()});
 (o.ld||[]).forEach(function(obj){var s=document.createElement("script");s.type="application/ld+json";s.setAttribute("data-ld","1");s.textContent=JSON.stringify(obj);document.head.appendChild(s)})}
@@ -380,21 +265,21 @@ function serviceLD(s,c){var o={"@context":"https://schema.org","@type":"Service"
 function ctaBlock(title,text){return '<section class="final"><div class="aura"><i></i><i></i><i></i></div><div class="wrap" style="position:relative;z-index:2"><h2>'+title+'</h2><p class="lead" style="margin:0 auto 22px">'+text+'</p><a class="bigcall" href="tel:'+TEL+'">'+DISP+'</a><div class="row" style="justify-content:center"><a class="btn bp" href="tel:'+TEL+'">Позвонить</a><a class="btn bg" href="#/contact/">Оставить заявку</a><button class="btn bg" data-copy="'+TEL+'" data-msg="Номер скопирован">Скопировать номер</button></div></div></section>'}
 function faqBlock(list,id){return '<div'+(id?' id="'+id+'"':'')+'>'+list.map(function(f){return '<div class="qa rv"><button type="button" aria-expanded="false">'+esc(f[0])+'<svg class="ar" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="pn"><p>'+esc(f[1])+'</p></div></div>'}).join("")+'</div>'}
 function reviewBlock(){return '<div class="grid g2">'+REVIEWS.map(function(r){return '<blockquote class="quote rv"><p>'+esc(r[1])+'</p><footer><span class="av">'+esc(r[0].split(" ").map(function(w){return w[0]}).join(""))+'</span>'+esc(r[0])+'</footer></blockquote>'}).join("")+'</div>'}
-function cityLinks(svcSlug,filterR){return '<div class="citygrid">'+CITIES.filter(function(c){return !filterR||c.r===filterR}).map(function(c){return '<a class="citylink" href="#/services/'+svcSlug+'/'+c.s+'/">'+icon("pin")+esc(c.n)+'</a>'}).join("")+'</div>'}
+function cityLinks(svcSlug,filterR){var service=svc(svcSlug);if(service&&service.noGeo)return '<p class="note">Для этой услуги отдельные городские страницы не создаются.</p>';return '<div class="citygrid">'+CITIES.filter(function(c){return !filterR||c.r===filterR}).map(function(c){return '<a class="citylink" href="#/services/'+svcSlug+'/'+c.s+'/">'+icon("pin")+esc(c.n)+'</a>'}).join("")+'</div>'}
 function tiersBlock(s){return '<div class="tiers">'+s.tiers.map(function(t){return '<div class="tier rv"><div><b>'+esc(t.n)+'</b><p>'+esc(t.d)+'</p></div><span class="p">'+rub(t.p)+' ₽</span></div>'}).join("")+'</div>'}
-function svcCard(s,city){var u="/services/"+s.s+"/"+(city?city+"/":"");
-return '<article class="card rv" style="--acc:'+s.acc+'"><span class="ic">'+icon(s.ic)+'</span><h3>'+esc(s.n)+(city?' <span style="color:var(--mut);font-weight:600">· '+esc(cty(city).n)+'</span>':'')+'</h3><p>'+esc(s.short)+'</p><div class="price">от '+rub(s.from)+' ₽ <span style="color:var(--mut);font-weight:400;font-size:12px">'+esc(s.unit)+'</span></div><a class="go" href="#'+u+'">Подробнее '+icon("arrow")+'</a></article>'}
+function svcCard(s,city){var useCity=!!(city&&!s.noGeo),u="/services/"+s.s+"/"+(useCity?city+"/":"");
+return '<article class="card rv" style="--acc:'+s.acc+'"><span class="ic">'+icon(s.ic)+'</span><h3>'+esc(s.n)+(useCity?' <span style="color:var(--mut);font-weight:600">· '+esc(cty(city).n)+'</span>':'')+'</h3><p>'+esc(s.short)+'</p><div class="price">от '+rub(s.from)+' ₽ <span style="color:var(--mut);font-weight:400;font-size:12px">'+esc(s.unit)+'</span></div><a class="go" href="#'+u+'">Подробнее '+icon("arrow")+'</a></article>'}
 function caseCard(x){var s=svc(x.sv);return '<article class="card rv" style="--acc:'+(s?s.acc:"var(--cyan)")+'"><div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="badge g">'+icon("pin")+' '+esc(x.c)+'</span><span class="badge">'+x.y+'</span></div><div class="mono" style="font-size:11px;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">'+esc(x.k)+'</div><h3>'+esc(x.t)+'</h3><p>'+esc(x.d)+'</p><a class="go" href="#/services/'+x.sv+'/">'+esc(s?s.n:"Услуга")+' '+icon("arrow")+'</a></article>'}
 
 /* ================= СТРАНИЦЫ ================= */
 function pageHome(){
 var city=getCity();
 return '<section class="hero"><div class="gridbg"></div><div class="aura"><i></i><i></i><i></i></div><div class="wrap"><div class="split"><div>'+
-'<span class="eyebrow st">Удаленные ИТ-услуги · 18 городов · 8 направлений</span>'+
+'<span class="eyebrow st">Удаленные ИТ-услуги · '+CITIES.length+' городов · '+SERVICES.length+' направлений</span>'+
 '<h1 class="st">Программист на задачу: <span class="hl">парсеры, сайты, автоматизация</span> и поддержка</h1>'+
 '<p class="lead st">Беру конкретную задачу и довожу до результата: собрать базу организаций, начать видеть цены конкурентов, починить сайт, связать 1С с CRM, написать бота. Работаю удаленно по всей России, цену и срок называю до начала работ.</p>'+
 '<div class="row st" style="margin-top:22px"><a class="btn bp" href="tel:'+TEL+'">'+icon("code")+'Обсудить задачу</a><a class="btn bg" href="#/services/">Все услуги и цены</a><button class="btn bg" id="heroSearch">Поиск по сайту <span class="mono" style="font-size:11px;opacity:.7">Ctrl+K</span></button></div>'+
-'<div class="kpis st"><div class="kpi"><b data-count="230">230</b><span>созданных сайтов</span></div><div class="kpi"><b data-count="90">90</b><span>веб-приложений</span></div><div class="kpi"><b data-count="1300">1300</b><span>написанных программ</span></div><div class="kpi"><b data-count="18">18</b><span>городов клиентов</span></div></div>'+
+'<div class="kpis st"><div class="kpi"><b data-count="230">230</b><span>созданных сайтов</span></div><div class="kpi"><b data-count="90">90</b><span>веб-приложений</span></div><div class="kpi"><b data-count="1300">1300</b><span>написанных программ</span></div><div class="kpi"><b data-count="'+CITIES.length+'">'+CITIES.length+'</b><span>городов клиентов</span></div></div>'+
 '</div><div class="panel st"><div class="plabel"><span>Ваш город</span><span class="mono" style="color:var(--lime)">цены одинаковые</span></div>'+
 '<select class="sel" id="cityPick" aria-label="Выберите город">'+CITIES.map(function(c){return '<option value="'+c.s+'"'+(c.s===city?" selected":"")+'>'+esc(c.n)+' · '+c.tz+'</option>'}).join("")+'</select>'+
 '<p style="color:var(--mut);font-size:13.5px;margin:12px 0" id="cityNote">'+esc(cty(city).ind)+'</p>'+
@@ -403,7 +288,7 @@ return '<section class="hero"><div class="gridbg"></div><div class="aura"><i></i
 '<div style="margin-top:14px;font:400 12px var(--m);color:var(--mut)">Выбор города меняет ссылки на услуги: они ведут на страницы с местным контекстом, кейсом и часовым поясом.</div>'+
 '</div></div></div></section>'+
 '<div class="ticker"><div class="tr" id="tr">'+SERVICES.concat(SERVICES).map(function(s){return '<span><b>●</b> '+esc(s.n)+' · от '+rub(s.from)+' ₽</span>'}).join("")+'</div></div>'+
-'<section class="sec" id="uslugi"><div class="wrap"><span class="eyebrow rv">Направления</span><h2 class="rv">Что я <span class="hl">делаю</span></h2><p class="lead rv" style="margin-bottom:24px">Восемь направлений, в которых беру задачи под ключ. Внутри каждого — состав работ, пакеты и сроки.</p><div class="grid g4" id="homeSvc">'+SERVICES.map(function(s){return svcCard(s,city)}).join("")+'</div></div></section>'+
+'<section class="sec" id="uslugi"><div class="wrap"><span class="eyebrow rv">Направления</span><h2 class="rv">Что я <span class="hl">делаю</span></h2><p class="lead rv" style="margin-bottom:24px">'+SERVICES.length+' направлений, в которых беру задачи под ключ. Внутри каждого — состав работ, пакеты и сроки.</p><div class="grid g4" id="homeSvc">'+SERVICES.map(function(s){return svcCard(s,city)}).join("")+'</div></div></section>'+
 '<section class="sec" style="background:var(--ink2)"><div class="gridbg"></div><div class="wrap"><span class="eyebrow rv">География</span><h2 class="rv">Услуги <span class="hl">под ваш город</span></h2><p class="lead rv" style="margin-bottom:22px">Работаю удаленно, но задачи в городах разные: в Челябинске это прайсы металлобаз, в Краснодаре — агроцены, во Владивостоке — поддержка с поправкой на семь часов. Выберите направление и город.</p>'+
 '<div class="grid g2 rv" style="margin-bottom:20px"><select class="sel" id="geoSvc" aria-label="Направление">'+SERVICES.map(function(s){return '<option value="'+s.s+'">'+esc(s.n)+'</option>'}).join("")+'</select><select class="sel" id="geoDist" aria-label="Округ"><option value="all">Все округа</option>'+["ЦФО","СЗФО","ЮФО","ПФО","УФО","СФО","ДФО"].map(function(r){return '<option>'+r+'</option>'}).join("")+'</select></div>'+
 '<div id="geoCities" class="rv">'+cityLinks(SERVICES[0].s)+'</div>'+
@@ -560,16 +445,16 @@ function setCity(v){try{localStorage.setItem("city",v)}catch(e){}}
 var current="/";
 function render(){
 var u=resolve();current=u;var parts=u.split("/").filter(Boolean),html,meta;
-if(u==="/"){html=pageHome();meta={title:"Услуги программиста удаленно по России — Константин Коротков",desc:"Парсеры и базы данных, мониторинг цен, сайты, интеграции 1С и CRM, Telegram-боты и удаленная техподдержка. 18 городов. "+DISP,u:u,ld:[{"@context":"https://schema.org","@type":"ProfessionalService","name":"Константин Коротков · услуги программиста","url":BASE,"telephone":TEL,"areaServed":{"@type":"Country","name":"Россия"},"priceRange":"500–45000 RUB","founder":personLD()}]}}
+if(u==="/"){html=pageHome();meta={title:"Услуги программиста удаленно по России — Константин Коротков",desc:"Парсеры и базы данных, мониторинг цен, сайты, интеграции 1С и CRM, Telegram-боты и удаленная техподдержка. "+CITIES.length+" городов и "+SERVICES.length+" направлений. "+DISP,u:u,ld:[{"@context":"https://schema.org","@type":"ProfessionalService","name":"Константин Коротков · услуги программиста","url":BASE,"telephone":TEL,"areaServed":{"@type":"Country","name":"Россия"},"priceRange":"500–45000 RUB","founder":personLD()}]}}
 else if(u==="/about/"){html=pageAbout();meta={title:"Обо мне — Константин Коротков, программист",desc:"Выпускник ИВГПУ, 230 сайтов, 90 веб-приложений, 1300 программ. Принципы работы, опыт и инструменты.",u:u,ld:[{"@context":"https://schema.org","@type":"Person","name":"Константин Коротков","url":urlOf(u),"telephone":TEL,"jobTitle":"Программист"},crumbsLD([{n:"Главная",u:"/"},{n:"Обо мне",u:u}])]}}
-else if(u==="/services/"){html=pageServices();meta={title:"Услуги программиста — каталог направлений и цен",desc:"8 направлений: парсеры, мониторинг цен, сайты, WordPress, интеграции, боты, поддержка. Цены от 500 ₽.",u:u,ld:[crumbsLD([{n:"Главная",u:"/"},{n:"Услуги",u:u}]),{"@context":"https://schema.org","@type":"ItemList","numberOfItems":SERVICES.length,"itemListElement":SERVICES.map(function(s,i){return {"@type":"ListItem","position":i+1,"name":s.n,"url":urlOf("/services/"+s.s+"/")}})}]}}
+else if(u==="/services/"){html=pageServices();meta={title:"Услуги программиста — каталог направлений и цен",desc:SERVICES.length+" направлений: парсеры, мониторинг цен, сайты, WordPress, интеграции, боты и поддержка. Цены от 500 ₽.",u:u,ld:[crumbsLD([{n:"Главная",u:"/"},{n:"Услуги",u:u}]),{"@context":"https://schema.org","@type":"ItemList","numberOfItems":SERVICES.length,"itemListElement":SERVICES.map(function(s,i){return {"@type":"ListItem","position":i+1,"name":s.n,"url":urlOf("/services/"+s.s+"/")}})}]}}
 else if(u==="/blog/"){html=pageBlog();meta={title:"Блог — парсеры, сайты, SEO и автоматизация",desc:"Практические разборы: семантика для ИТ-услуг, законность парсинга, мониторинг цен, гео-страницы и sitemap.",u:u,ld:[crumbsLD([{n:"Главная",u:"/"},{n:"Блог",u:u}])]}}
 else if(u==="/contact/"){html=pageContact();meta={title:"Контакты — заказать задачу у программиста",desc:"Телефон "+DISP+", форма заявки и SMS. Удаленная работа по всей России, оценка задачи бесплатно.",u:u,ld:[{"@context":"https://schema.org","@type":"ContactPage","url":urlOf(u),"mainEntity":{"@type":"Person","name":"Константин Коротков","telephone":TEL}},crumbsLD([{n:"Главная",u:"/"},{n:"Контакты",u:u}])]}}
 else if(u==="/sitemap/"){html=pageSitemap();meta={title:"Карта сайта — sitemap.xml, robots.txt и городские страницы",desc:"Полный список адресов сайта, генератор sitemap.xml и robots.txt, выгрузка структуры ZIP.",u:u,ld:[crumbsLD([{n:"Главная",u:"/"},{n:"Карта сайта",u:u}])]}}
 else if(parts[0]==="services"&&parts.length===2){var s=svc(parts[1]);html=pageService(parts[1]);meta={title:s?s.n+" — цена от "+rub(s.from)+" ₽ удаленно":"Страница не найдена",desc:s?s.short:"",u:u,ld:s?[serviceLD(s),crumbsLD([{n:"Главная",u:"/"},{n:"Услуги",u:"/services/"},{n:s.n,u:u}])]:[]}}
 else if(parts[0]==="services"&&parts.length===3){var s2=svc(parts[1]),c2=cty(parts[2]);html=pageGeo(parts[1],parts[2]);meta={title:s2&&c2?s2.n+" в "+c2.n+" — от "+rub(s2.from)+" ₽ удаленно":"Страница не найдена",desc:s2&&c2?s2.n+" для заказчиков из "+c2.n+": "+s2.short:" ",u:u,ld:s2&&c2?[serviceLD(s2,c2),crumbsLD([{n:"Главная",u:"/"},{n:"Услуги",u:"/services/"},{n:s2.n,u:"/services/"+s2.s+"/"},{n:c2.n,u:u}])]:[]}}
 else if(parts[0]==="blog"&&parts.length===2){var p=post(parts[1]);html=pagePost(parts[1]);meta={title:p?p.t:"Статья не найдена",desc:p?p.x:"",u:u,ld:p?[{"@context":"https://schema.org","@type":"Article","headline":p.t,"datePublished":p.d,"author":personLD(),"publisher":personLD(),"mainEntityOfPage":urlOf(u),"articleSection":p.tag},crumbsLD([{n:"Главная",u:"/"},{n:"Блог",u:"/blog/"},{n:p.t,u:u}])]:[]}}
-else{html=page404();meta={title:"Страница не найдена",desc:"Адрес не найден.",u:"/",ld:[]}}
+else{html=page404();meta={title:"Страница не найдена",desc:"Адрес не найден.",u:u,noindex:true,canonical:false,ld:[]}}
 $("#app").innerHTML=html;setMeta(meta);
 $$("#nav a").forEach(function(a){var h=a.getAttribute("href").replace("#","");a.classList.toggle("on",h===u||(h!=="/"&&u.indexOf(h)===0))});
 $("#mnav").classList.remove("open");$("#burger").setAttribute("aria-expanded","false");
@@ -713,7 +598,7 @@ toast("ZIP готов: "+files.length+" файлов, "+(z.length/1048576).toFix
 /* ================= ПОИСК ================= */
 var sIdx=[];
 SERVICES.forEach(function(s){sIdx.push({t:s.n,s:"Услуга · от "+rub(s.from)+" ₽",u:"/services/"+s.s+"/",k:(s.short+" "+s.bullets.join(" ")).toLowerCase()})});
-CITIES.forEach(function(c){SERVICES.forEach(function(s){sIdx.push({t:s.n+" — "+c.n,s:"Город · "+c.r+" · "+c.tz,u:"/services/"+s.s+"/"+c.s+"/",k:(c.n+" "+c.r+" "+s.n).toLowerCase()})})});
+CITIES.forEach(function(c){SERVICES.forEach(function(s){if(!s.noGeo)sIdx.push({t:s.n+" — "+c.n,s:"Город · "+c.r+" · "+c.tz,u:"/services/"+s.s+"/"+c.s+"/",k:(c.n+" "+c.r+" "+s.n).toLowerCase()})})});
 POSTS.forEach(function(p){sIdx.push({t:p.t,s:"Статья · "+p.tag,u:"/blog/"+p.s+"/",k:(p.x+" "+p.b.map(function(b){return b.join(" ")}).join(" ")).toLowerCase()})});
 [["Главная","/"],["Обо мне","/about/"],["Услуги","/services/"],["Блог","/blog/"],["Контакты","/contact/"],["Карта сайта","/sitemap/"]].forEach(function(x){sIdx.push({t:x[0],s:"Раздел",u:x[1],k:x[0].toLowerCase()})});
 function sDraw(q){q=(q||"").trim().toLowerCase();

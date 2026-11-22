@@ -1,4 +1,4 @@
-# STATIC-ONLY v7 — без петли за nginx
+# STATIC-ONLY v8 — единая база data.js, без петли за nginx
 Options -Indexes
 DirectoryIndex index.html
 AddDefaultCharset UTF-8
@@ -14,7 +14,7 @@ AddDefaultCharset UTF-8
   <FilesMatch "\.(html)$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
-  <FilesMatch "(^|/)data\.js$">
+  <Files "data.js">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
   <FilesMatch "\.(css|svg|png|jpg|jpeg|webp|woff2?|ico)$">
