@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
-Disallow: /_wp-trash*
-Disallow: /clean.php
-Disallow: /*?nc=
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /wp-json/
+Disallow: /*?s=
+Disallow: /*?replytocom=
 
 Sitemap: https://ipkorotkov.online/sitemap.xml
