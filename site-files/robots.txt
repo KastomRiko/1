@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /wp-admin/
-Disallow: /wp-login.php
-Disallow: /wp-json/
-Disallow: /*?s=
-Disallow: /*?replytocom=
-
-Sitemap: https://ipkorotkov.online/sitemap.xml
